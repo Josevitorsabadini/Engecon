@@ -1,0 +1,43 @@
+---
+title: Documentação do Banco — Engecon
+tags:
+  - banco-de-dados
+  - entidades
+aliases:
+  - documentação banco
+  - entidades
+---
+
+→ [[ÍNDICE]] | [[Banco.sql]] | [[Relacionamentos]]
+
+# Documentação — Explicação de Cada Entidade
+
+Usuários
+Representa as pessoas que têm acesso ao sistema. Cada usuário possui um nome, e-mail de login, senha armazenada de forma criptografada e um perfil que define o que ele pode ver e fazer. Um usuário pode ser desativado sem ser excluído do sistema.
+
+Colaboradores
+Representa as pessoas que trabalham nas obras da Engecon. Nem todo colaborador precisa ter acesso ao sistema — o vínculo com um usuário é opcional. Cada colaborador tem um cargo, um valor de diária e um status que indica se está ativo, inativo ou afastado.
+
+Fornecedores
+Representa as empresas ou pessoas físicas que fornecem materiais para a Engecon. Armazena dados de contato e um campo de observações livre para anotações relevantes. Um fornecedor pode aparecer como origem em movimentações de entrada de materiais.
+
+Depósitos
+Representa os pontos físicos de armazenamento que pertencem à própria Engecon — como um almoxarifado central ou depósito de apoio. Serve como origem ou destino em movimentações, junto com obras e fornecedores.
+
+Obras
+Representa cada obra gerenciada pela Engecon. Possui nome, endereço, status (ativa, pausada ou encerrada) e datas de início, previsão de término e encerramento real. Uma obra pode receber colaboradores alocados e está vinculada a movimentações de materiais.
+
+Alocações
+Representa o vínculo entre um colaborador e uma obra. Registra em qual período o colaborador esteve trabalhando em determinada obra, com data de início e data de fim (em aberto enquanto a alocação estiver ativa). Um colaborador pode ter várias alocações ao longo do tempo, em obras diferentes ou até simultâneas.
+
+Produtos
+Representa o catálogo de materiais utilizados pela Engecon. Cada produto tem um código interno único, nome, tipo (categoria), unidade de medida e um valor unitário de referência. É a base para o estoque e para todas as movimentações.
+
+Estoque
+Representa a posição atual de cada produto no almoxarifado. Existe um único registro por produto, com a quantidade disponível e o valor unitário da última entrada. O valor total em estoque é calculado automaticamente pelo banco multiplicando quantidade por valor unitário — sem necessidade de cálculo manual.
+
+Movimentações
+Representa cada entrada, saída ou transferência de material registrada no sistema. Armazena o produto, a quantidade, o valor unitário no momento da operação e o valor total (calculado automaticamente). Também registra a origem e o destino da movimentação — que podem ser uma obra, um fornecedor ou um depósito — e o usuário que realizou o registro. É a tabela central do sistema operacional e a base para todos os relatórios e gráficos.
+
+Logs
+Registra automaticamente todas as ações relevantes feitas no sistema — criações, edições e exclusões. Armazena quem fez a ação, em qual tabela, em qual registro e um detalhe em formato livre com informações adicionais quando necessário. Existe exclusivamente para fins de auditoria interna.
