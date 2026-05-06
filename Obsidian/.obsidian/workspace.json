@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "95a31b14d7323049",
+        "id": "81394dd8376ed409",
         "type": "tabs",
         "children": [
           {
-            "id": "6b794603ab82425c",
+            "id": "53a003c4879b45bf",
             "type": "leaf",
             "state": {
-              "type": "empty",
+              "type": "graph",
               "state": {},
-              "icon": "lucide-file",
-              "title": "Nova aba"
+              "icon": "lucide-git-fork",
+              "title": "Visualização em gráfico"
             }
           }
         ]
@@ -37,7 +37,7 @@
               "type": "file-explorer",
               "state": {
                 "sortOrder": "alphabetical",
-                "autoReveal": false
+                "autoReveal": true
               },
               "icon": "lucide-folder-closed",
               "title": "Explorador de arquivos"
@@ -176,13 +176,15 @@
       "bases:Criar nova base": false
     }
   },
-  "active": "6127862e47282188",
+  "active": "53a003c4879b45bf",
   "lastOpenFiles": [
+    "Decisões e Alterações.md",
+    "Banco de dados/Relacionamentos.md",
+    "Sem título",
     "Banco de dados/Banco.sql.md",
     "Banco de dados/Documentação banco.md",
     "Escopo do projeto/Escopo.md",
     "Legal.md",
-    "Sem título",
     "Banco de dados",
     "Escopo do projeto",
     "Bem-vindo.md"
