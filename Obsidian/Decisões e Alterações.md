@@ -46,6 +46,23 @@ aliases:
 
 ## Entradas
 
+## 2026-05-07 — Fase 1 concluída — Segurança base do Fastify
+
+**Contexto:** Fase 0 entregue (estrutura, schema Prisma, app.ts mínimo). Iniciando Fase 1 conforme cronograma.
+
+**Decisão:** Implementar Helmet, CORS, rate limiting e error handler centralizado diretamente no `app.ts`, com `buildApp` convertido para `async`.
+
+**Motivo:** Todos os plugins de segurança precisam estar registrados no escopo raiz do Fastify para cobrir todas as rotas. A abordagem direta (sem wrapper `fastify-plugin`) é mais simples e suficiente para o escopo atual.
+
+**Impacto:**
+- `src/app.ts` — async, registra helmet + cors + rateLimit, `setErrorHandler`, `setNotFoundHandler`
+- `src/plugins/error-handler.ts` — criado: handler centralizado que nunca expõe stack trace em produção; diferencia erros de validação (400), erros HTTP conhecidos (<500) e erros internos (500)
+- `src/server.ts` — atualizado para lidar com `buildApp()` assíncrono via `.then()`
+- CORS aceita múltiplas origens via `CORS_ORIGIN` separado por vírgula
+- Rate limit lê `RATE_LIMIT_MAX` e `RATE_LIMIT_WINDOW` do `.env`
+
+---
+
 ## 2026-05-06 — Estruturação inicial do Obsidian como base de documentação
 
 **Contexto:** Projeto Engecon iniciado. Documentação existia em dois arquivos brutos no Obsidian (Escopo.md e banco de dados). Sem estrutura de navegação.
