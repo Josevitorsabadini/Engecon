@@ -64,10 +64,11 @@ model Usuario {
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  colaboradores Colaborador[]
-  estoques      Estoque[]
-  movimentacoes Movimentacao[]
-  logs          Log[]
+  colaboradores  Colaborador[]
+  estoques       Estoque[]
+  movimentacoes  Movimentacao[]
+  logs           Log[]
+  refreshTokens  RefreshToken[]
 
   @@map("usuarios")
 }
@@ -212,6 +213,18 @@ model Movimentacao {
   usuario    Usuario     @relation(fields: [realizadoPor], references: [id])
 
   @@map("movimentacoes")
+}
+
+model RefreshToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token     String   @unique @db.Uuid
+  usuarioId String   @map("usuario_id") @db.Uuid
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@map("refresh_tokens")
 }
 
 model Log {

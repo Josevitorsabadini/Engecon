@@ -1,8 +1,23 @@
-import Fastify from 'fastify'
+import Fastify, { type FastifyRequest, type FastifyReply } from 'fastify'
 import helmet from '@fastify/helmet'
 import cors from '@fastify/cors'
 import rateLimit from '@fastify/rate-limit'
+import fastifyCookie from '@fastify/cookie'
+import fastifyJwt from '@fastify/jwt'
 import { errorHandler } from './plugins/error-handler'
+import { authRoutes } from './modules/auth/auth.routes'
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>
+  }
+}
+
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    user: { sub: string; perfil: 'leitor' | 'editor' | 'administrador' }
+  }
+}
 
 function getCorsOrigin(): string | string[] | false {
   const raw = process.env.CORS_ORIGIN
@@ -48,7 +63,27 @@ export async function buildApp() {
     })
   })
 
-  // Fase 2 — autenticação (JWT, refresh token)
+  // Fase 2 — autenticação
+  await app.register(fastifyCookie)
+
+  await app.register(fastifyJwt, {
+    secret: process.env.JWT_SECRET ?? 'dev-secret-troque-em-producao',
+  })
+
+  app.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
+    try {
+      await request.jwtVerify()
+    } catch {
+      reply.status(401).send({
+        statusCode: 401,
+        error: 'Unauthorized',
+        message: 'Token inválido ou ausente.',
+      })
+    }
+  })
+
+  await app.register(authRoutes)
+
   // Fases 4–7 — rotas dos módulos
 
   app.get('/health', async () => ({ status: 'ok' }))

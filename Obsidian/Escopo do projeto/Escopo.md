@@ -18,7 +18,7 @@ Frontend: React 18 + Vite + Tailwind CSS v3
 Backend: Node.js + Fastify
 Banco de dados: PostgreSQL via Supabase (apenas como host do banco — sem Supabase Auth, sem RLS, sem SDK do Supabase no projeto)
 ORM: Prisma (a confirmar na Fase 0)
-Autenticação: sistema já pronto (Supabase Auth + Resend)
+Autenticação: JWT (15min) + refresh token (UUID opaco, httpOnly cookie) + brute-force. Implementado do zero na Fase 2
 Hospedagem inicial: local (máquina do dev)
 Hospedagem futura: VPS — fora do escopo atual
 

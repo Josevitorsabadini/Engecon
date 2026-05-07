@@ -22,7 +22,7 @@ aliases:
 | Backend | Node.js + Fastify | — |
 | Banco de dados | PostgreSQL via Supabase | Supabase = host only |
 | ORM | Prisma | A confirmar na Fase 0 |
-| Autenticação | Supabase Auth + Resend | Já implementado |
+| Autenticação | JWT + refresh token (bcrypt, @fastify/jwt) | Implementado na Fase 2 |
 | Hospedagem atual | Local (máquina do dev) | — |
 | Hospedagem futura | VPS | Fora do escopo atual |
 

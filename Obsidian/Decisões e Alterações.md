@@ -46,6 +46,26 @@ aliases:
 
 ## Entradas
 
+## 2026-05-07 — Fase 2 concluída — Autenticação (JWT + refresh token + brute-force)
+
+**Contexto:** Fase 1 entregue. Iniciando Fase 2 conforme cronograma.
+
+**Decisão:** Refresh token armazenado como UUID opaco na tabela `refresh_tokens` (não como JWT assinado). Access token é JWT de 15min. Brute-force em memória (Map) — sem Redis ou banco para essa camada.
+
+**Motivo:** UUID opaco é mais simples que JWT como refresh token e facilita invalidação direta no banco. Brute-force in-memory é suficiente para implantação local single-instance; se escalar, migra para Redis.
+
+**Impacto:**
+- `prisma/schema.prisma` — novo model `RefreshToken` (uuid, usuario_id, expires_at)
+- `prisma/migrations/20260507000001_add_refresh_tokens/migration.sql` — migration criada
+- `src/lib/brute-force.ts` — tracker em memória: bloqueia após 5 falhas por 15 min
+- `src/lib/errors.ts` — classe `AppError` com `statusCode` para uso no service
+- `src/modules/auth/auth.schema.ts` — schema Zod para login
+- `src/modules/auth/auth.service.ts` — lógica de login/refresh/logout com bcryptjs
+- `src/modules/auth/auth.routes.ts` — POST /auth/login, /auth/refresh, /auth/logout
+- `src/app.ts` — registra @fastify/cookie, @fastify/jwt, decorator `authenticate`, auth routes
+
+---
+
 ## 2026-05-07 — Fase 1 concluída — Segurança base do Fastify
 
 **Contexto:** Fase 0 entregue (estrutura, schema Prisma, app.ts mínimo). Iniciando Fase 1 conforme cronograma.
