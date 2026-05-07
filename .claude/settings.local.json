@@ -3,7 +3,18 @@
     "allow": [
       "PowerShell(npm *)",
       "PowerShell(npm audit *)",
-      "PowerShell(Receive-Job *)"
+      "PowerShell(Receive-Job *)",
+      "Bash(npx tsc *)",
+      "Bash(copy .env.example .env)",
+      "Bash(npx tsx *)",
+      "Bash(cp .env.example .env)",
+      "Bash(DATABASE_URL=\"postgresql://fake:fake@localhost:5432/fake\" npx tsx src/server.ts)",
+      "Bash(curl -s http://localhost:3333/health)",
+      "Bash(kill %1)",
+      "Bash(curl -si http://localhost:3333/health)",
+      "Bash(curl -si http://localhost:3333/rota-inexistente)",
+      "Bash(curl *)",
+      "Bash(git add *)"
     ]
   }
 }
