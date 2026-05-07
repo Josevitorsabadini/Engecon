@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────
+
+enum Perfil {
+  leitor
+  editor
+  administrador
+}
+
+enum StatusColaborador {
+  ativo
+  inativo
+  afastado
+
+  @@map("status_colaborador")
+}
+
+enum StatusObra {
+  ativa
+  pausada
+  encerrada
+
+  @@map("status_obra")
+}
+
+enum TipoMovimentacao {
+  entrada
+  saida
+  transferencia
+
+  @@map("tipo_movimentacao")
+}
+
+enum TipoEntidade {
+  obra
+  fornecedor
+  deposito
+
+  @@map("tipo_entidade")
+}
+
+// ─────────────────────────────────────────
+// Models
+// ─────────────────────────────────────────
+
+model Usuario {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome      String
+  email     String    @unique
+  senhaHash String    @map("senha_hash")
+  perfil    Perfil
+  ativo     Boolean   @default(true)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  colaboradores Colaborador[]
+  estoques      Estoque[]
+  movimentacoes Movimentacao[]
+  logs          Log[]
+
+  @@map("usuarios")
+}
+
+model Colaborador {
+  id          String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome        String
+  cpf         String?           @unique
+  telefone    String?
+  cargo       String
+  valorDiaria Decimal           @map("valor_diaria") @db.Decimal
+  status      StatusColaborador @default(ativo)
+  usuarioId   String?           @map("usuario_id") @db.Uuid
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?         @map("deleted_at") @db.Timestamptz(6)
+
+  usuario   Usuario?   @relation(fields: [usuarioId], references: [id])
+  alocacoes Alocacao[]
+
+  @@map("colaboradores")
+}
+
+model Fornecedor {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome        String
+  cnpjCpf     String?   @unique @map("cnpj_cpf")
+  telefone    String?
+  email       String?
+  observacoes String?
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  movimentacoes Movimentacao[]
+
+  @@map("fornecedores")
+}
+
+model Deposito {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome      String
+  descricao String?
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  @@map("depositos")
+}
+
+model Obra {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome            String
+  endereco        String?
+  status          StatusObra @default(ativa)
+  dataInicio      DateTime?  @map("data_inicio") @db.Date
+  dataPrevisaoFim DateTime?  @map("data_previsao_fim") @db.Date
+  dataFim         DateTime?  @map("data_fim") @db.Date
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime?  @map("deleted_at") @db.Timestamptz(6)
+
+  alocacoes     Alocacao[]
+  movimentacoes Movimentacao[]
+
+  @@map("obras")
+}
+
+model Alocacao {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  colaboradorId String    @map("colaborador_id") @db.Uuid
+  obraId        String    @map("obra_id") @db.Uuid
+  dataInicio    DateTime  @map("data_inicio") @db.Date
+  dataFim       DateTime? @map("data_fim") @db.Date
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  colaborador Colaborador @relation(fields: [colaboradorId], references: [id])
+  obra        Obra        @relation(fields: [obraId], references: [id])
+
+  @@map("alocacoes")
+}
+
+model Produto {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  codigo        String    @unique
+  nome          String
+  tipo          String?
+  unidadeMedida String    @map("unidade_medida")
+  valorUnitario Decimal   @map("valor_unitario") @db.Decimal
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  estoque       Estoque?
+  movimentacoes Movimentacao[]
+
+  @@map("produtos")
+}
+
+model Estoque {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  produtoId     String    @unique @map("produto_id") @db.Uuid
+  quantidade    Decimal   @default(0) @db.Decimal
+  valorUnitario Decimal   @map("valor_unitario") @db.Decimal
+  // GENERATED ALWAYS AS (quantidade * valor_unitario) STORED — nunca escrever diretamente
+  valorTotal    Decimal   @default(dbgenerated("(quantidade * valor_unitario)")) @map("valor_total") @db.Decimal
+  atualizadoPor String?   @map("atualizado_por") @db.Uuid
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  produto Produto  @relation(fields: [produtoId], references: [id])
+  usuario Usuario? @relation(fields: [atualizadoPor], references: [id])
+
+  @@map("estoque")
+}
+
+model Movimentacao {
+  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tipo          TipoMovimentacao
+  produtoId     String           @map("produto_id") @db.Uuid
+  quantidade    Decimal          @db.Decimal
+  valorUnitario Decimal          @map("valor_unitario") @db.Decimal
+  // GENERATED ALWAYS AS (quantidade * valor_unitario) STORED — nunca escrever diretamente
+  valorTotal    Decimal          @default(dbgenerated("(quantidade * valor_unitario)")) @map("valor_total") @db.Decimal
+  origemTipo    TipoEntidade?    @map("origem_tipo")
+  origemId      String?          @map("origem_id") @db.Uuid
+  destinoTipo   TipoEntidade?    @map("destino_tipo")
+  destinoId     String?          @map("destino_id") @db.Uuid
+  obraId        String?          @map("obra_id") @db.Uuid
+  fornecedorId  String?          @map("fornecedor_id") @db.Uuid
+  observacoes   String?
+  realizadoPor  String           @map("realizado_por") @db.Uuid
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt     DateTime?        @map("deleted_at") @db.Timestamptz(6)
+
+  produto    Produto     @relation(fields: [produtoId], references: [id])
+  obra       Obra?       @relation(fields: [obraId], references: [id])
+  fornecedor Fornecedor? @relation(fields: [fornecedorId], references: [id])
+  usuario    Usuario     @relation(fields: [realizadoPor], references: [id])
+
+  @@map("movimentacoes")
+}
+
+model Log {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usuarioId     String   @map("usuario_id") @db.Uuid
+  acao          String
+  tabelaAfetada String   @map("tabela_afetada")
+  registroId    String?  @map("registro_id") @db.Uuid
+  detalhe       Json?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+
+  @@map("logs")
+}
