@@ -45,6 +45,9 @@ Login · Dashboard · Resumo Geral · Movimentações · Produtos · Estoque · 
 ### Cronograma
 11 fases — 22 a 33 dias de trabalho ativo → [[Fases]]
 
+### Fase Atual
+**Fase 4 — Módulo: Movimentações** · Fases 0–3 concluídas
+
 ---
 
 ## Alertas de Contexto

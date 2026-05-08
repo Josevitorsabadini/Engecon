@@ -89,6 +89,7 @@ model Colaborador {
   usuario   Usuario?   @relation(fields: [usuarioId], references: [id])
   alocacoes Alocacao[]
 
+  @@index([usuarioId], map: "idx_colaboradores_usuario")
   @@map("colaboradores")
 }
 
@@ -149,6 +150,8 @@ model Alocacao {
   colaborador Colaborador @relation(fields: [colaboradorId], references: [id])
   obra        Obra        @relation(fields: [obraId], references: [id])
 
+  @@index([colaboradorId], map: "idx_alocacoes_colaborador")
+  @@index([obraId], map: "idx_alocacoes_obra")
   @@map("alocacoes")
 }
 
@@ -212,6 +215,12 @@ model Movimentacao {
   fornecedor Fornecedor? @relation(fields: [fornecedorId], references: [id])
   usuario    Usuario     @relation(fields: [realizadoPor], references: [id])
 
+  @@index([produtoId], map: "idx_movimentacoes_produto")
+  @@index([obraId], map: "idx_movimentacoes_obra")
+  @@index([tipo], map: "idx_movimentacoes_tipo")
+  @@index([createdAt], map: "idx_movimentacoes_created")
+  @@index([origemTipo, origemId], map: "idx_movimentacoes_origem")
+  @@index([destinoTipo, destinoId], map: "idx_movimentacoes_destino")
   @@map("movimentacoes")
 }
 
@@ -238,5 +247,8 @@ model Log {
 
   usuario Usuario @relation(fields: [usuarioId], references: [id])
 
+  @@index([usuarioId], map: "idx_logs_usuario")
+  @@index([tabelaAfetada], map: "idx_logs_tabela")
+  @@index([createdAt], map: "idx_logs_created")
   @@map("logs")
 }

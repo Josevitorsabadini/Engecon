@@ -11,8 +11,12 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
+    "db:seed": "prisma db seed",
     "db:resolve": "prisma migrate resolve --applied 20260507000000_initial",
     "db:resolve:2": "prisma migrate resolve --applied 20260507000001_add_refresh_tokens"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",

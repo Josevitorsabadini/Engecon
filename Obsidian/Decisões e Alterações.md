@@ -46,6 +46,24 @@ aliases:
 
 ## Entradas
 
+## 2026-05-08 — Fase 3 concluída — Banco de dados completo
+
+**Contexto:** Schema Prisma e migrations já aplicados no Supabase. Faltavam dois itens para encerrar a fase.
+
+**Decisão:**
+1. Adicionados `@@index` no `schema.prisma` espelhando exatamente os 13 índices criados via SQL manual (`idx_colaboradores_usuario`, `idx_alocacoes_*`, `idx_movimentacoes_*`, `idx_logs_*`). O índice `idx_estoque_produto` foi omitido por ser redundante com a constraint `@unique` já existente em `produto_id`.
+2. Criado `prisma/seed.ts` com: upsert do admin via `SEED_ADMIN_EMAIL/PASSWORD/NOME` do `.env`; upsert de 1 fornecedor (CNPJ único), 1 depósito e 1 obra (IDs fixos para idempotência), 5 produtos de construção civil (código único). Script registrado em `package.json` → `"prisma": { "seed": "tsx prisma/seed.ts" }`.
+
+**Motivo:** `@@index` mantém o schema como fonte de verdade sem depender da memória das migrations manuais. Seed idempotente evita duplicação em múltiplas execuções.
+
+**Impacto:**
+- `prisma/schema.prisma` — `@@index` adicionados em `Colaborador`, `Alocacao`, `Movimentacao`, `Log`
+- `prisma/seed.ts` — criado
+- `package.json` — script `db:seed` + bloco `"prisma": { "seed": ... }`
+- `.env.example` — variáveis `SEED_ADMIN_*` documentadas
+
+---
+
 ## 2026-05-07 — Fase 2 concluída — Autenticação (JWT + refresh token + brute-force)
 
 **Contexto:** Fase 1 entregue. Iniciando Fase 2 conforme cronograma.

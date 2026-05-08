@@ -16,19 +16,19 @@ aliases:
 
 ## Tabela de Fases
 
-| Fase | Nome | Duração estimada | Segurança incluída |
-|---|---|---|---|
-| 0 | Arquitetura e Setup | 1–2 dias | Padrões, .env, estratégia de logs |
-| 1 | Ambiente de Desenvolvimento | 1–2 dias | Helmet, CORS, rate limiting, erros |
-| 2 | Autenticação | 1–2 dias | JWT, refresh token, brute-force |
-| 3 | Modelagem e criação do banco | 2–3 dias | Constraints, soft delete, índices, GENERATED |
-| 4 | Módulo: Movimentações | 3–4 dias | Zod, autorização, logs de operação |
-| 5 | Módulo: Produtos e Estoque | 2–3 dias | Zod, autorização, logs de operação |
-| 6 | Módulo: Colaboradores e Alocações | 2–3 dias | Zod, autorização, logs de operação |
-| 7 | Painel Admin: Fornecedores, Depósitos, Obras, Usuários | 2–3 dias | Zod, autorização, logs de operação |
-| 8 | Dashboard e Resumo Geral | 2 dias | Queries sem expor dados fora do perfil |
-| 9 | Frontend React Integrado | 5–10 dias | Rotas protegidas, httpOnly cookie |
-| 10 | Testes e Preparação para Deploy | 2–3 dias | Pen test básico, hardening VPS |
+| Fase | Nome | Duração estimada | Segurança incluída | Status |
+|---|---|---|---|---|
+| 0 | Arquitetura e Setup | 1–2 dias | Padrões, .env, estratégia de logs | ✅ Concluída |
+| 1 | Ambiente de Desenvolvimento | 1–2 dias | Helmet, CORS, rate limiting, erros | ✅ Concluída |
+| 2 | Autenticação | 1–2 dias | JWT, refresh token, brute-force | ✅ Concluída |
+| 3 | Modelagem e criação do banco | 2–3 dias | Constraints, soft delete, índices, GENERATED | ✅ Concluída |
+| 4 | Módulo: Movimentações | 3–4 dias | Zod, autorização, logs de operação | ⏳ Em andamento |
+| 5 | Módulo: Produtos e Estoque | 2–3 dias | Zod, autorização, logs de operação | — |
+| 6 | Módulo: Colaboradores e Alocações | 2–3 dias | Zod, autorização, logs de operação | — |
+| 7 | Painel Admin: Fornecedores, Depósitos, Obras, Usuários | 2–3 dias | Zod, autorização, logs de operação | — |
+| 8 | Dashboard e Resumo Geral | 2 dias | Queries sem expor dados fora do perfil | — |
+| 9 | Frontend React Integrado | 5–10 dias | Rotas protegidas, httpOnly cookie | — |
+| 10 | Testes e Preparação para Deploy | 2–3 dias | Pen test básico, hardening VPS | — |
 
 ---
 
