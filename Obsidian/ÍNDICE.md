@@ -19,6 +19,7 @@ aliases:
 |---|---|---|
 | Escopo | [[Escopo]] | Visão geral, módulos, perfis, cronograma |
 | Stack | [[Stack e Arquitetura]] | Tech stack, camadas de segurança |
+| Padrões | [[Padrões de Desenvolvimento]] | Como rodar, migrations, padrão de módulo, infra pendente |
 | Banco — Entidades | [[Documentação banco]] | Descrição semântica de cada tabela |
 | Banco — SQL | [[Banco.sql]] | Schema completo PostgreSQL |
 | Banco — Relacionamentos | [[Relacionamentos]] | ERD, FKs, índices, colunas geradas |
@@ -56,7 +57,7 @@ Login · Dashboard · Resumo Geral · Movimentações · Produtos · Estoque · 
 > Supabase é usado **somente como host do PostgreSQL**. Sem Auth, sem RLS, sem SDK do Supabase no código.
 
 > [!info] Autenticação
-> JWT com expiração curta (15min) + refresh token (UUID opaco, httpOnly cookie). Brute-force bloqueado após 5 tentativas. Implementado do zero — sem Supabase Auth, sem Resend.
+> JWT com expiração curta (30min) + refresh token (UUID opaco, httpOnly cookie). Brute-force bloqueado após 5 tentativas. Implementado do zero — sem Supabase Auth, sem Resend.
 
 > [!info] Hospedagem
 > Ambiente atual: local (máquina do dev). VPS está **fora do escopo** desta versão.

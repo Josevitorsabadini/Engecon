@@ -49,6 +49,23 @@ Criação do schema PostgreSQL com todas as constraints, soft delete, índices e
 ### Fase 4 — Movimentações *(3–4 dias)*
 Backend + API do módulo de movimentações: entradas, saídas e transferências. Módulo mais complexo do sistema — tabela central.
 
+> [!warning] Pré-requisitos — criar antes das rotas
+> Os itens abaixo **não existem no codebase** e bloqueiam toda a Fase 4. Ver detalhes em [[Padrões de Desenvolvimento]].
+> 1. **Decorator `authorize`** em `src/app.ts` — autorização por perfil (403 se perfil não permitido)
+> 2. **Helper `createLog`** em `src/lib/log.ts` — insere registro na tabela `logs`
+
+#### Regras de negócio — impacto no estoque
+
+O estoque (`estoque`) é **global por produto** (não por localização). Ao salvar uma movimentação:
+
+| Tipo | Efeito no estoque |
+|---|---|
+| `entrada` | `quantidade +=` · `valor_unitario` atualizado para o da movimentação |
+| `saida` | `quantidade -=` · validar: quantidade não pode ficar negativa |
+| `transferencia` | quantidade não muda (a soma total é preservada) |
+
+`valor_total` é coluna gerada — nunca atualizar diretamente.
+
 ### Fase 5 — Produtos e Estoque *(2–3 dias)*
 CRUD de produtos e lógica de atualização do estoque a cada movimentação.
 

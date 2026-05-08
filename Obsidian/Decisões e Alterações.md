@@ -46,6 +46,22 @@ aliases:
 
 ## Entradas
 
+## 2026-05-08 — Documentação completada para autonomia entre sessões
+
+**Contexto:** Auditoria revelou que a documentação não era suficiente para uma sessão sem contexto iniciar a Fase 4 sem retrabalho.
+
+**Decisão:** Corrigir todas as lacunas identificadas:
+1. `JWT_EXPIRES_IN` corrigido de 15min para **30min** em todos os arquivos (ÍNDICE, Escopo, Decisões, `.env.example`)
+2. Criado `Arquitetura/Padrões de Desenvolvimento.md` com: comandos para rodar o projeto, fluxo de migrations (SQL manual + `db:resolve`), padrão de módulo (schema/service/routes), e especificação dos dois pré-requisitos da Fase 4 (`authorize` + `createLog`)
+3. `Cronograma/Fases.md` — Fase 4 expandida com: bloco de pré-requisitos e tabela de regras de negócio do impacto no estoque por tipo de movimentação
+4. `ÍNDICE.md` — link para Padrões de Desenvolvimento adicionado
+
+**Motivo:** O Obsidian deve ser suficiente para que qualquer sessão futura entenda o estado atual, o que falta construir e como construir — sem precisar ler o código-fonte para descobrir padrões ou decisões não óbvias.
+
+**Impacto:** Nenhum código alterado. Apenas documentação.
+
+---
+
 ## 2026-05-08 — Fase 3 concluída — Banco de dados completo
 
 **Contexto:** Schema Prisma e migrations já aplicados no Supabase. Faltavam dois itens para encerrar a fase.
@@ -68,7 +84,7 @@ aliases:
 
 **Contexto:** Fase 1 entregue. Iniciando Fase 2 conforme cronograma.
 
-**Decisão:** Refresh token armazenado como UUID opaco na tabela `refresh_tokens` (não como JWT assinado). Access token é JWT de 15min. Brute-force em memória (Map) — sem Redis ou banco para essa camada.
+**Decisão:** Refresh token armazenado como UUID opaco na tabela `refresh_tokens` (não como JWT assinado). Access token é JWT de 30min. Brute-force em memória (Map) — sem Redis ou banco para essa camada.
 
 **Motivo:** UUID opaco é mais simples que JWT como refresh token e facilita invalidação direta no banco. Brute-force in-memory é suficiente para implantação local single-instance; se escalar, migra para Redis.
 
