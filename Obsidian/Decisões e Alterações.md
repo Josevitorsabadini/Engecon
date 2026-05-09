@@ -46,6 +46,28 @@ aliases:
 
 ## Entradas
 
+## 2026-05-09 — Auditoria de consistência código × documentação
+
+**Contexto:** Auditoria completa de todos os arquivos TypeScript do backend e todos os arquivos do Obsidian para identificar divergências entre código e documentação.
+
+**Decisão:** Quatro inconsistências encontradas e corrigidas:
+1. **JWT fallback hardcoded como `'15m'`** em `auth.routes.ts` (linha 31 e 53) — corrigido para `'30m'` (alinhado com toda a documentação e `.env.example`). A entrada de `Decisões e Alterações.md` de 2026-05-08 afirmava que todos os arquivos haviam sido corrigidos, mas o código em si foi omitido.
+2. **Variáveis `REFRESH_TOKEN_SECRET` e `REFRESH_TOKEN_EXPIRES_IN`** no `.env.example` — removidas. Refresh tokens são UUIDs opacos armazenados no banco, não JWTs assinados; essas variáveis nunca foram lidas pelo código.
+3. **`Stack e Arquitetura.md`** mencionava `CHECK` em campos de tipo e perfil — corrigido para refletir o uso real de **PostgreSQL enum types**.
+4. **`Banco.sql.md`, `Relacionamentos.md` e `Documentação banco.md`** não documentavam a tabela `refresh_tokens` (criada na migration `20260507000001_add_refresh_tokens`) — tabela adicionada nos três arquivos.
+
+**Motivo:** A tabela `refresh_tokens` foi criada em uma migration separada após o schema inicial, e a documentação não foi atualizada. O fallback de JWT e as variáveis de ambiente mortas eram resquícios do rascunho inicial.
+
+**Impacto:**
+- `backend/src/modules/auth/auth.routes.ts` — fallback de `'15m'` → `'30m'` em dois lugares
+- `backend/.env.example` — removidas `REFRESH_TOKEN_SECRET` e `REFRESH_TOKEN_EXPIRES_IN`
+- `Obsidian/Arquitetura/Stack e Arquitetura.md` — CHECK → enum types
+- `Obsidian/Banco de dados/Banco.sql.md` — tabela `refresh_tokens` adicionada
+- `Obsidian/Banco de dados/Relacionamentos.md` — `refresh_tokens` adicionado ao ERD, mapa de FKs e exceções de soft delete
+- `Obsidian/Banco de dados/Documentação banco.md` — entidade `refresh_tokens` descrita
+
+---
+
 ## 2026-05-09 — Correção: migration ajuste + seed estoque
 
 **Contexto:** Ao tentar aplicar a migration `20260509000000_add_ajuste_tipo_movimentacao` no Supabase, retornou erro: `ERROR: 22P02: invalid input value for enum tipo_movimentacao: "ajuste"`.

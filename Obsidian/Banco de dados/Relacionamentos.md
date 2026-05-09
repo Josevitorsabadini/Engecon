@@ -20,6 +20,7 @@ erDiagram
     usuarios ||--o{ estoque : "atualizado_por (opcional)"
     usuarios ||--o{ movimentacoes : "realizado_por (obrigatório)"
     usuarios ||--o{ logs : "usuario_id (obrigatório)"
+    usuarios ||--o{ refresh_tokens : "usuario_id (obrigatório)"
 
     colaboradores ||--o{ alocacoes : "colaborador_id"
     obras ||--o{ alocacoes : "obra_id"
@@ -47,6 +48,7 @@ erDiagram
 | `movimentacoes` | `fornecedor_id` | `fornecedores.id` | Não |
 | `movimentacoes` | `realizado_por` | `usuarios.id` | Sim |
 | `logs` | `usuario_id` | `usuarios.id` | Sim |
+| `refresh_tokens` | `usuario_id` | `usuarios.id` | Sim |
 
 ---
 
@@ -84,7 +86,7 @@ Tabelas com `deleted_at TIMESTAMPTZ`:
 `usuarios` · `colaboradores` · `fornecedores` · `depositos` · `obras` · `produtos` · `estoque` · `movimentacoes`
 
 > [!note] Exceções sem soft delete
-> `alocacoes` e `logs` **não** possuem `deleted_at`.
+> `alocacoes`, `logs` e `refresh_tokens` **não** possuem `deleted_at`. Em `refresh_tokens`, o registro é deletado permanentemente no logout.
 
 ---
 

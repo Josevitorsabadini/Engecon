@@ -37,7 +37,7 @@ aliases:
 - Usuário de conexão com permissões mínimas
 - String de conexão exclusivamente em variável de ambiente
 - Queries via Prisma — sem SQL raw com input do usuário
-- Constraints: `NOT NULL`, `UNIQUE`, `CHECK` em campos de tipo e perfil
+- Constraints: `NOT NULL`, `UNIQUE`; campos de tipo/perfil/status usam **PostgreSQL enum types** (não VARCHAR + CHECK)
 - Timestamps automáticos em todas as tabelas (`created_at`, `updated_at`)
 - Soft delete (`deleted_at`) — sem exclusão permanente
 - Colunas geradas pelo banco: `valor_total` em `estoque` e `movimentacoes`

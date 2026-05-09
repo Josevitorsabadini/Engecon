@@ -162,6 +162,17 @@ CREATE TABLE "logs" (
   "created_at"     TIMESTAMPTZ(6) NOT NULL DEFAULT now()
 );
 
+-- REFRESH TOKENS — sem soft delete
+CREATE TABLE "refresh_tokens" (
+  "id"         UUID NOT NULL DEFAULT gen_random_uuid(),
+  "token"      UUID NOT NULL,
+  "usuario_id" UUID NOT NULL REFERENCES "usuarios"("id"),
+  "expires_at" TIMESTAMPTZ(6) NOT NULL,
+  "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "refresh_tokens_pkey" PRIMARY KEY ("id")
+);
+CREATE UNIQUE INDEX "refresh_tokens_token_key" ON "refresh_tokens"("token");
+
 -- ─────────────────────────────────────────
 -- ÍNDICES
 -- ─────────────────────────────────────────

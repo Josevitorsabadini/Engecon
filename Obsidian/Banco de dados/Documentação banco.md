@@ -41,3 +41,6 @@ Representa cada entrada, saída, transferência ou ajuste manual de estoque regi
 
 Logs
 Registra automaticamente todas as ações relevantes feitas no sistema — criações, edições e exclusões. Armazena quem fez a ação, em qual tabela, em qual registro e um detalhe em formato livre com informações adicionais quando necessário. Existe exclusivamente para fins de auditoria interna.
+
+Refresh Tokens
+Armazena os tokens de renovação de sessão de cada usuário. Cada registro contém um UUID opaco (não um JWT assinado), o vínculo com o usuário, e uma data de expiração. Quando o usuário faz logout, o registro é deletado permanentemente. Não possui soft delete — a remoção é definitiva. Permite reemissão de access tokens sem necessidade de novo login enquanto a sessão estiver válida.
