@@ -19,7 +19,7 @@ aliases:
 |---|---|---|
 | Escopo | [[Escopo]] | Visão geral, módulos, perfis, cronograma |
 | Stack | [[Stack e Arquitetura]] | Tech stack, camadas de segurança |
-| Padrões | [[Padrões de Desenvolvimento]] | Como rodar, migrations, padrão de módulo, infra pendente |
+| Padrões | [[Padrões de Desenvolvimento]] | Como rodar, migrations, padrão de módulo, infraestrutura base |
 | Banco — Entidades | [[Documentação banco]] | Descrição semântica de cada tabela |
 | Banco — SQL | [[Banco.sql]] | Schema completo PostgreSQL |
 | Banco — Relacionamentos | [[Relacionamentos]] | ERD, FKs, índices, colunas geradas |

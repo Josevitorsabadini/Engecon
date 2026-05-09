@@ -21,7 +21,7 @@ aliases:
 | Frontend | React 18 + Vite + Tailwind CSS v3 | — |
 | Backend | Node.js + Fastify | — |
 | Banco de dados | PostgreSQL via Supabase | Supabase = host only |
-| ORM | Prisma | A confirmar na Fase 0 |
+| ORM | Prisma | Confirmado e em uso desde a Fase 0 |
 | Autenticação | JWT + refresh token (bcrypt, @fastify/jwt) | Implementado na Fase 2 |
 | Hospedagem atual | Local (máquina do dev) | — |
 | Hospedagem futura | VPS | Fora do escopo atual |

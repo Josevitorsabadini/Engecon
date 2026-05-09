@@ -89,6 +89,9 @@ src/modules/auth/
 ```typescript
 // Fases 4–7 — rotas dos módulos
 await app.register(movimentacoesRoutes, { prefix: '/movimentacoes' })
+await app.register(produtosRoutes,      { prefix: '/produtos' })
+await app.register(estoqueRoutes,       { prefix: '/estoque' })
+// próximos módulos seguem o mesmo padrão
 ```
 
 ### Imports padrão de um service

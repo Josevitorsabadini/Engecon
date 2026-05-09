@@ -46,6 +46,24 @@ aliases:
 
 ## Entradas
 
+## 2026-05-09 — Correção: migration ajuste + seed estoque
+
+**Contexto:** Ao tentar aplicar a migration `20260509000000_add_ajuste_tipo_movimentacao` no Supabase, retornou erro: `ERROR: 22P02: invalid input value for enum tipo_movimentacao: "ajuste"`.
+
+**Decisão:**
+1. **Migration corrigida**: o banco usa **PostgreSQL enum type** (`CREATE TYPE "tipo_movimentacao" AS ENUM ...`), não `VARCHAR + CHECK constraint`. A migration estava errada — usava `ALTER TABLE ... DROP CONSTRAINT / ADD CONSTRAINT`. Corrigida para `ALTER TYPE "tipo_movimentacao" ADD VALUE IF NOT EXISTS 'ajuste'`.
+2. **Seed corrigido**: os 5 produtos criados pelo seed não tinham registro em `estoque`. Com a decisão da Fase 5 (estoque criado automaticamente com `quantidade=0`), o seed foi atualizado para fazer `upsert` em `estoque` após criar cada produto.
+3. **`Banco.sql.md` corrigido**: o schema documentado mostrava `VARCHAR + CHECK` para todos os campos de tipo/perfil/status. Atualizado para refletir o schema real com enum types.
+
+**Motivo:** O `Banco.sql.md` original era o rascunho conceitual escrito antes das migrations. As migrations geradas usaram enum types (padrão do Prisma com PostgreSQL).
+
+**Impacto:**
+- `prisma/migrations/20260509000000_add_ajuste_tipo_movimentacao/migration.sql` — corrigido
+- `prisma/seed.ts` — upsert de estoque adicionado para cada produto
+- `Banco.sql.md` — schema corrigido para refletir o banco real
+
+---
+
 ## 2026-05-09 — Fase 5 concluída — Módulo Produtos e Estoque
 
 **Contexto:** Fase 5 iniciada. Três decisões de produto definidas antes da implementação.

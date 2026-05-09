@@ -17,7 +17,7 @@ Stack tecnológica confirmada:
 Frontend: React 18 + Vite + Tailwind CSS v3
 Backend: Node.js + Fastify
 Banco de dados: PostgreSQL via Supabase (apenas como host do banco — sem Supabase Auth, sem RLS, sem SDK do Supabase no projeto)
-ORM: Prisma (a confirmar na Fase 0)
+ORM: Prisma
 Autenticação: JWT (30min) + refresh token (UUID opaco, httpOnly cookie) + brute-force. Implementado do zero na Fase 2
 Hospedagem inicial: local (máquina do dev)
 Hospedagem futura: VPS — fora do escopo atual
@@ -28,7 +28,7 @@ Módulos confirmados:
 Portal de Login — autenticação, redirecionamento por perfil
 Dashboard Principal — navegação central, visão geral do sistema
 Resumo Geral — KPIs consolidados de movimentações, estoque e obras
-Movimentações — registro de entradas, saídas e transferências de materiais com produto, quantidade, valor unitário, valor total, origem e destino
+Movimentações — registro de entradas, saídas, transferências e ajustes manuais de estoque, com produto, quantidade, valor unitário, valor total, origem e destino
 Produtos — catálogo de materiais: cadastro, edição e inativação de produtos com código, tipo, unidade de medida e valor unitário de referência
 Estoque — posição atual de cada produto: quantidade disponível, valor unitário e valor total calculado automaticamente
 Colaboradores — cadastro de colaboradores com nome, CPF, telefone, cargo, valor de diária e status. Inclui alocação a obras com data de início, data de fim e obra de destino
@@ -52,7 +52,7 @@ depositos — pontos físicos de armazenamento da Engecon, usados como origem/de
 obras — obras gerenciadas pela Engecon
 produtos — catálogo de materiais
 estoque — posição atual por produto, valor total calculado automaticamente pelo banco
-movimentacoes — entradas, saídas e transferências, com origem e destino tipados (obra, fornecedor, depósito)
+movimentacoes — entradas, saídas, transferências e ajustes manuais de estoque, com origem e destino tipados (obra, fornecedor, depósito)
 logs — auditoria interna de todas as ações críticas
 
 
@@ -62,7 +62,7 @@ Banco de dados:
 Usuário de conexão com permissões mínimas
 String de conexão exclusivamente em variável de ambiente
 Queries via Prisma (sem SQL raw com input do usuário)
-Constraints no banco: NOT NULL, UNIQUE, CHECK em campos de tipo e perfil
+Constraints no banco: NOT NULL, UNIQUE; campos de tipo/perfil/status usam PostgreSQL enum types (não VARCHAR + CHECK)
 Timestamps automáticos em todas as tabelas (created_at, updated_at)
 Soft delete (deleted_at) em vez de exclusão permanente
 Colunas geradas pelo banco: valor_total em estoque e movimentações

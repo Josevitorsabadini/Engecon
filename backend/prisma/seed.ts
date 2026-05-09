@@ -23,10 +23,10 @@ async function main() {
     where:  { cnpjCpf: '12.345.678/0001-99' },
     update: {},
     create: {
-      nome:       'Distribuidora Central de Materiais',
-      cnpjCpf:    '12.345.678/0001-99',
-      telefone:   '(11) 99999-0000',
-      email:      'contato@distcentral.com',
+      nome:     'Distribuidora Central de Materiais',
+      cnpjCpf:  '12.345.678/0001-99',
+      telefone: '(11) 99999-0000',
+      email:    'contato@distcentral.com',
     },
   })
   console.log(`[seed] fornecedor ok: ${fornecedor.nome}`)
@@ -59,13 +59,13 @@ async function main() {
   })
   console.log(`[seed] obra ok: ${obra.nome}`)
 
-  // ─── Produtos ─────────────────────────────────────────────────────────────
+  // ─── Produtos + Estoque ───────────────────────────────────────────────────
   const produtos = [
-    { codigo: 'CIM-001', nome: 'Cimento Portland CP-II 50kg',   tipo: 'Cimento',    unidadeMedida: 'saco',     valorUnitario: 38.5  },
-    { codigo: 'FER-001', nome: 'Ferro CA-50 10mm 12m',           tipo: 'Ferragem',   unidadeMedida: 'barra',    valorUnitario: 42.0  },
-    { codigo: 'ARG-001', nome: 'Areia Média Lavada',              tipo: 'Agregado',   unidadeMedida: 'm³',       valorUnitario: 120.0 },
-    { codigo: 'TIJ-001', nome: 'Tijolo Cerâmico 9 furos',        tipo: 'Alvenaria',  unidadeMedida: 'milheiro', valorUnitario: 850.0 },
-    { codigo: 'CAB-001', nome: 'Cabo Elétrico 2,5mm² Flexível',  tipo: 'Elétrico',   unidadeMedida: 'metro',    valorUnitario: 3.8   },
+    { codigo: 'CIM-001', nome: 'Cimento Portland CP-II 50kg',  tipo: 'Cimento',   unidadeMedida: 'saco',     valorUnitario: 38.5  },
+    { codigo: 'FER-001', nome: 'Ferro CA-50 10mm 12m',          tipo: 'Ferragem',  unidadeMedida: 'barra',    valorUnitario: 42.0  },
+    { codigo: 'ARG-001', nome: 'Areia Média Lavada',             tipo: 'Agregado',  unidadeMedida: 'm³',       valorUnitario: 120.0 },
+    { codigo: 'TIJ-001', nome: 'Tijolo Cerâmico 9 furos',       tipo: 'Alvenaria', unidadeMedida: 'milheiro', valorUnitario: 850.0 },
+    { codigo: 'CAB-001', nome: 'Cabo Elétrico 2,5mm² Flexível', tipo: 'Elétrico',  unidadeMedida: 'metro',    valorUnitario: 3.8   },
   ]
 
   for (const p of produtos) {
@@ -75,6 +75,18 @@ async function main() {
       create: p,
     })
     console.log(`[seed] produto ok: ${produto.codigo} — ${produto.nome}`)
+
+    await prisma.estoque.upsert({
+      where:  { produtoId: produto.id },
+      update: {},
+      create: {
+        produtoId:     produto.id,
+        quantidade:    0,
+        valorUnitario: p.valorUnitario,
+        atualizadoPor: admin.id,
+      },
+    })
+    console.log(`[seed] estoque ok: ${produto.codigo}`)
   }
 }
 

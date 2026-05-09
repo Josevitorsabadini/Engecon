@@ -37,7 +37,7 @@ Estoque
 Representa a posição atual de cada produto no almoxarifado. Existe um único registro por produto, com a quantidade disponível e o valor unitário da última entrada. O valor total em estoque é calculado automaticamente pelo banco multiplicando quantidade por valor unitário — sem necessidade de cálculo manual.
 
 Movimentações
-Representa cada entrada, saída ou transferência de material registrada no sistema. Armazena o produto, a quantidade, o valor unitário no momento da operação e o valor total (calculado automaticamente). Também registra a origem e o destino da movimentação — que podem ser uma obra, um fornecedor ou um depósito — e o usuário que realizou o registro. É a tabela central do sistema operacional e a base para todos os relatórios e gráficos.
+Representa cada entrada, saída, transferência ou ajuste manual de estoque registrado no sistema. Armazena o produto, a quantidade, o valor unitário no momento da operação e o valor total (calculado automaticamente). Também registra a origem e o destino da movimentação — que podem ser uma obra, um fornecedor ou um depósito — e o usuário que realizou o registro. É a tabela central do sistema operacional e a base para todos os relatórios e gráficos.
 
 Logs
 Registra automaticamente todas as ações relevantes feitas no sistema — criações, edições e exclusões. Armazena quem fez a ação, em qual tabela, em qual registro e um detalhe em formato livre com informações adicionais quando necessário. Existe exclusivamente para fins de auditoria interna.
