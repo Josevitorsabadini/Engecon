@@ -95,31 +95,24 @@ await app.register(movimentacoesRoutes, { prefix: '/movimentacoes' })
 ```typescript
 import { prisma }    from '../../lib/prisma'
 import { AppError }  from '../../lib/errors'
-import { createLog } from '../../lib/log'     // a criar na Fase 4
+import { createLog } from '../../lib/log'
 ```
 
 ---
 
-## Infraestrutura Pendente — Implementar no início da Fase 4
+## Infraestrutura Base — já implementada (Fase 4)
 
-> [!todo] Estes dois itens não existem no codebase ainda
-> Devem ser criados **antes** de qualquer rota das Fases 4–7.
+> [!success] Estes dois itens existem no codebase desde a Fase 4
 
 ### 1. Decorator `authorize` — autorização por perfil
 
-**Onde criar:** `src/app.ts`, junto ao decorator `authenticate` já existente.
+**Arquivo:** `src/app.ts` (junto ao decorator `authenticate`)
 
 **O que faz:** recebe uma lista de perfis permitidos e rejeita com `403 Forbidden` se o perfil do usuário autenticado não estiver na lista.
 
 **Diferença do `authenticate`:**
 - `authenticate` — verifica se o token é válido (quem é você?)
 - `authorize`    — verifica se o perfil tem permissão (o que você pode fazer?)
-
-**Declaração de tipo esperada:**
-```typescript
-// src/app.ts — dentro do declare module 'fastify'
-authorize: (perfis: Perfil[]) => (request: FastifyRequest, reply: FastifyReply) => Promise<void>
-```
 
 **Uso nas rotas:**
 ```typescript
@@ -130,30 +123,29 @@ preHandler: [app.authenticate, app.authorize(['editor', 'administrador'])]
 
 ### 2. Helper `createLog` — auditoria de operações
 
-**Onde criar:** `src/lib/log.ts`
+**Arquivo:** `src/lib/log.ts`
 
-**O que faz:** insere um registro na tabela `logs` com `usuarioId`, `acao`, `tabelaAfetada`, `registroId` e `detalhe` (JSON livre).
+**O que faz:** insere um registro na tabela `logs`. Aceita parâmetro `tx` opcional para chamada dentro de uma transação Prisma — garante que log e operação sejam atômicos.
 
-**Quando usar:** em todo service que escreve no banco — create, update e soft-delete.
+**Quando usar:** em todo service que escreve no banco — create, update e soft-delete. Sempre chamar dentro da mesma transação da operação.
 
-**Interface esperada:**
+**Assinatura:**
 ```typescript
 createLog({
   usuarioId:     string,
-  acao:          string,          // ex: 'criar', 'editar', 'inativar'
+  acao:          string,          // 'criar' | 'editar' | 'inativar'
   tabelaAfetada: string,          // ex: 'movimentacoes'
   registroId?:   string,
   detalhe?:      Record<string, unknown>,
-})
+}, tx?)                           // tx = cliente de transação Prisma
 ```
 
-**Uso esperado em um service:**
+**Uso em um service:**
 ```typescript
-await createLog({
-  usuarioId,
-  acao:          'criar',
-  tabelaAfetada: 'movimentacoes',
-  registroId:    novaMovimentacao.id,
+await prisma.$transaction(async (tx) => {
+  const novo = await tx.produto.create({ data: { ... } })
+  await createLog({ usuarioId, acao: 'criar', tabelaAfetada: 'produtos', registroId: novo.id }, tx)
+  return novo
 })
 ```
 

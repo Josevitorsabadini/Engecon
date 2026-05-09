@@ -47,12 +47,10 @@ Implementação de JWT com expiração curta, refresh token, bloqueio por brute-
 Criação do schema PostgreSQL com todas as constraints, soft delete, índices e colunas geradas. Ver [[Banco.sql]] e [[Relacionamentos]].
 
 ### Fase 4 — Movimentações *(3–4 dias)*
-Backend + API do módulo de movimentações: entradas, saídas e transferências. Módulo mais complexo do sistema — tabela central.
+Backend + API do módulo de movimentações. Módulo mais complexo do sistema — tabela central.
 
-> [!warning] Pré-requisitos — criar antes das rotas
-> Os itens abaixo **não existem no codebase** e bloqueiam toda a Fase 4. Ver detalhes em [[Padrões de Desenvolvimento]].
-> 1. **Decorator `authorize`** em `src/app.ts` — autorização por perfil (403 se perfil não permitido)
-> 2. **Helper `createLog`** em `src/lib/log.ts` — insere registro na tabela `logs`
+> [!success] Infraestrutura base criada nesta fase
+> `authorize` (decorator em `src/app.ts`) e `createLog` (`src/lib/log.ts`) já existem. Ver detalhes em [[Padrões de Desenvolvimento]].
 
 #### Regras de negócio — impacto no estoque
 
@@ -61,16 +59,48 @@ O estoque (`estoque`) é **global por produto** (não por localização). Ao sal
 | Tipo | Efeito no estoque |
 |---|---|
 | `entrada` | `quantidade +=` · `valor_unitario` atualizado para o da movimentação |
-| `saida` | `quantidade -=` · validar: quantidade não pode ficar negativa |
+| `saida` | `quantidade -=` · race condition evitado via `updateMany WHERE quantidade >= saida` |
 | `transferencia` | quantidade não muda (a soma total é preservada) |
+| `ajuste` | `quantidade` definida para valor absoluto · `valor_unitario` atualizado (ou mantido) · restrito a `administrador` |
 
 `valor_total` é coluna gerada — nunca atualizar diretamente.
 
 ### Fase 5 — Produtos e Estoque *(2–3 dias)*
-CRUD de produtos e lógica de atualização do estoque a cada movimentação.
+CRUD completo de produtos e leitura de estoque.
+
+#### O que foi implementado
+- `POST /produtos` — cria produto + registro de estoque com `quantidade=0` em transação única
+- `GET /produtos`, `GET /produtos/:id` — leitor não vê `valorUnitario`
+- `PATCH /produtos/:id` — atualiza nome, tipo, unidadeMedida, valorUnitario; `codigo` é **imutável**
+- `DELETE /produtos/:id` — soft delete; se `codigo` pertence a produto inativo, mensagem orienta reativação
+- `GET /estoque`, `GET /estoque/:produtoId` — leitor não vê `quantidade`, `valorUnitario`, `valorTotal`
+
+#### Decisão: estoque inicial
+Ao criar um produto, cria-se automaticamente um registro em `estoque` com `quantidade=0`. Assim todos os produtos aparecem na listagem de estoque desde o cadastro, sem depender de uma primeira entrada.
 
 ### Fase 6 — Colaboradores e Alocações *(2–3 dias)*
 CRUD de colaboradores + gerenciamento de alocações por obra e período.
+
+#### Endpoints esperados
+
+**Colaboradores** (`/colaboradores`)
+- `POST /` — editor, admin: cria colaborador; `cpf` opcional mas único quando presente
+- `GET /` — todos: leitor não vê `valorDiaria`; suporte a filtro por `status` e `search` (nome/cpf)
+- `GET /:id` — todos: leitor não vê `valorDiaria`; inclui alocações ativas
+- `PATCH /:id` — editor, admin: atualiza campos (exceto cpf se já definido? A definir)
+- `DELETE /:id` — editor, admin: soft delete (status → `inativo` + `deletedAt`)
+
+**Alocações** (`/colaboradores/:id/alocacoes` ou `/alocacoes`)
+- `POST /` — editor, admin: aloca colaborador em obra com `dataInicio`; `dataFim` opcional
+- `GET /` — todos: lista alocações (filtro por obra, colaborador, período)
+- `PATCH /:id` — editor, admin: atualiza `dataFim` para encerrar alocação
+- `DELETE /:id` — admin: hard delete (sem `deletedAt` em `Alocacao`)
+
+#### Regras de negócio
+- `Colaborador.usuarioId` — vínculo opcional com uma conta de usuário do sistema
+- `Alocacao` **não tem soft delete** — `deletedAt` não existe no schema; deleção é permanente
+- `valorDiaria` é campo numérico — invisível para `leitor`
+- Sem restrição de sobreposição de datas no banco — dois alocações do mesmo colaborador podem se sobrepor
 
 ### Fase 7 — Painel Administrativo *(2–3 dias)*
 CRUD de fornecedores, depósitos, obras e usuários. Acesso restrito ao perfil `administrador`.
