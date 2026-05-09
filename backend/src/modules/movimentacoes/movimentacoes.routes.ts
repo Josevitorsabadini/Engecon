@@ -25,6 +25,14 @@ export async function movimentacoesRoutes(app: FastifyInstance) {
       })
     }
 
+    if (parsed.data.tipo === 'ajuste' && request.user.perfil !== 'administrador') {
+      return reply.status(403).send({
+        statusCode: 403,
+        error: 'Forbidden',
+        message: 'Apenas administradores podem realizar ajustes manuais de estoque.',
+      })
+    }
+
     const movimentacao = await criarMovimentacaoService(parsed.data, request.user.sub)
     return reply.status(201).send(movimentacao)
   })

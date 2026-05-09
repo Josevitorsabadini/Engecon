@@ -7,6 +7,8 @@ import fastifyJwt from '@fastify/jwt'
 import { errorHandler } from './plugins/error-handler'
 import { authRoutes } from './modules/auth/auth.routes'
 import { movimentacoesRoutes } from './modules/movimentacoes/movimentacoes.routes'
+import { produtosRoutes } from './modules/produtos/produtos.routes'
+import { estoqueRoutes } from './modules/estoque/estoque.routes'
 
 type Perfil = 'leitor' | 'editor' | 'administrador'
 
@@ -102,6 +104,8 @@ export async function buildApp() {
 
   // Fases 4–7 — rotas dos módulos
   await app.register(movimentacoesRoutes, { prefix: '/movimentacoes' })
+  await app.register(produtosRoutes,      { prefix: '/produtos' })
+  await app.register(estoqueRoutes,       { prefix: '/estoque' })
 
   app.get('/health', async () => ({ status: 'ok' }))
 

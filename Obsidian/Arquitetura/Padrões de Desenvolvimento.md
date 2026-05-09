@@ -63,6 +63,7 @@ Definidas em `.env` via `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`. Padrão do `
 |---|---|---|
 | `npm run db:resolve` | `20260507000000_initial` | Schema completo (todas as tabelas, enums, índices) |
 | `npm run db:resolve:2` | `20260507000001_add_refresh_tokens` | Tabela `refresh_tokens` |
+| `npm run db:resolve:3` | `20260509000000_add_ajuste_tipo_movimentacao` | Adiciona `ajuste` ao CHECK constraint de `movimentacoes.tipo` |
 
 ---
 
@@ -155,3 +156,11 @@ await createLog({
   registroId:    novaMovimentacao.id,
 })
 ```
+
+---
+
+## Workflow do Frontend (Fase 9)
+
+> [!warning] Peça o design antes de criar qualquer tela
+> O projeto possui designs visuais de todas as telas. **Antes de implementar qualquer componente ou tela**, solicite ao usuário a referência visual correspondente.
+> Nunca assuma o layout — trabalhe a partir do design fornecido.

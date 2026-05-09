@@ -10,21 +10,24 @@ export async function criarMovimentacaoService(data: CriarMovimentacaoInput, usu
   if (!produto) throw new AppError('Produto não encontrado.', 404)
 
   const movimentacao = await prisma.$transaction(async (tx) => {
+    let valorUnitarioFinal = data.valorUnitario ?? 0
+
     if (data.tipo === 'entrada') {
       await tx.estoque.upsert({
         where: { produtoId: data.produtoId },
         create: {
-          produtoId:    data.produtoId,
-          quantidade:   data.quantidade,
-          valorUnitario: data.valorUnitario,
+          produtoId:     data.produtoId,
+          quantidade:    data.quantidade,
+          valorUnitario: data.valorUnitario!,
           atualizadoPor: usuarioId,
         },
         update: {
-          quantidade:   { increment: data.quantidade },
-          valorUnitario: data.valorUnitario,
+          quantidade:    { increment: data.quantidade },
+          valorUnitario: data.valorUnitario!,
           atualizadoPor: usuarioId,
         },
       })
+      valorUnitarioFinal = data.valorUnitario!
     }
 
     if (data.tipo === 'saida') {
@@ -33,7 +36,7 @@ export async function criarMovimentacaoService(data: CriarMovimentacaoInput, usu
         where: {
           produtoId: data.produtoId,
           quantidade: { gte: data.quantidade },
-          deletedAt: null,
+          deletedAt:  null,
         },
         data: {
           quantidade:    { decrement: data.quantidade },
@@ -43,6 +46,29 @@ export async function criarMovimentacaoService(data: CriarMovimentacaoInput, usu
       if (resultado.count === 0) {
         throw new AppError('Estoque insuficiente para realizar a saída.', 409)
       }
+      valorUnitarioFinal = data.valorUnitario!
+    }
+
+    if (data.tipo === 'transferencia') {
+      valorUnitarioFinal = data.valorUnitario!
+    }
+
+    if (data.tipo === 'ajuste') {
+      const estoqueAtual = await tx.estoque.findFirst({
+        where: { produtoId: data.produtoId, deletedAt: null },
+      })
+      if (!estoqueAtual) throw new AppError('Produto não possui estoque registrado. Registre uma entrada primeiro.', 404)
+
+      valorUnitarioFinal = data.valorUnitario ?? Number(estoqueAtual.valorUnitario)
+
+      await tx.estoque.update({
+        where: { id: estoqueAtual.id },
+        data: {
+          quantidade:    data.quantidade,
+          valorUnitario: valorUnitarioFinal,
+          atualizadoPor: usuarioId,
+        },
+      })
     }
 
     const nova = await tx.movimentacao.create({
@@ -50,7 +76,7 @@ export async function criarMovimentacaoService(data: CriarMovimentacaoInput, usu
         tipo:          data.tipo,
         produtoId:     data.produtoId,
         quantidade:    data.quantidade,
-        valorUnitario: data.valorUnitario,
+        valorUnitario: valorUnitarioFinal,
         origemTipo:    data.origemTipo,
         origemId:      data.origemId,
         destinoTipo:   data.destinoTipo,
@@ -90,7 +116,7 @@ export async function listarMovimentacoesService(query: ListarMovimentacoesQuery
   const skip = (page - 1) * pageSize
 
   const where = {
-    deletedAt: null,
+    deletedAt: null as null,
     ...(tipo      && { tipo }),
     ...(produtoId && { produtoId }),
     ...(dataInicio || dataFim

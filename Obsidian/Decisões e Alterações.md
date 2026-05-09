@@ -46,6 +46,35 @@ aliases:
 
 ## Entradas
 
+## 2026-05-09 — Fase 5 concluída — Módulo Produtos e Estoque
+
+**Contexto:** Fase 5 iniciada. Três decisões de produto definidas antes da implementação.
+
+**Decisão:**
+1. **Ajuste manual de estoque via `tipo: 'ajuste'` em movimentações** — mantém auditoria completa na tabela `movimentacoes`. Restrição extra no código: apenas `administrador` pode criar ajustes (mesmo que o preHandler permita editor). Migration `20260509000000_add_ajuste_tipo_movimentacao` necessária no Supabase.
+2. **`codigo` do produto é imutável** — não aparece no PATCH. Soft-delete com `codigo` único: se produto inativo tem o código, a mensagem de erro orienta a contatar o administrador para reativação.
+3. **Estoque criado automaticamente com `quantidade=0` ao criar produto** — todos os produtos aparecem na listagem de estoque desde o cadastro.
+4. **`valorUnitario` da movimentação `ajuste` é opcional** — se não informado, usa o valor atual do estoque. O valor é gravado na movimentação para manter `valorTotal` gerado coerente.
+
+**Motivo:**
+- `ajuste` via movimentação: auditoria completa, sem endpoint paralelo que burlaria o log.
+- Admin-only para ajuste: correção de inventário é operação sensível — editor não deve poder alterar arbitrariamente o estoque.
+- Estoque com `quantidade=0` desde o cadastro: frontend pode mostrar o catálogo com posição de estoque sem depender de ter ocorrido movimentações.
+
+**Impacto:**
+- `prisma/schema.prisma` — `ajuste` adicionado ao enum `TipoMovimentacao`
+- `prisma/migrations/20260509000000_add_ajuste_tipo_movimentacao/migration.sql` — criado (aplicar no Supabase)
+- `package.json` — script `db:resolve:3` adicionado
+- `src/modules/movimentacoes/movimentacoes.schema.ts` — `ajuste` adicionado, `valorUnitario` agora opcional com superRefine
+- `src/modules/movimentacoes/movimentacoes.service.ts` — bloco `ajuste` adicionado
+- `src/modules/movimentacoes/movimentacoes.routes.ts` — guarda admin-only para `ajuste`
+- `src/modules/produtos/` — criado (schema + service + routes): CRUD completo
+- `src/modules/estoque/` — criado (schema + service + routes): leitura com filtro por perfil
+- `src/app.ts` — rotas `/produtos` e `/estoque` registradas
+- `Padrões de Desenvolvimento.md` — migration e workflow de frontend adicionados
+
+---
+
 ## 2026-05-09 — Fase 4 concluída — Módulo Movimentações
 
 **Contexto:** Fase 4 iniciada. Pré-requisitos e módulo completo de movimentações implementados.

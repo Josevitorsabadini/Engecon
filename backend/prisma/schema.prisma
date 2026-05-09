@@ -37,6 +37,7 @@ enum TipoMovimentacao {
   entrada
   saida
   transferencia
+  ajuste
 
   @@map("tipo_movimentacao")
 }
