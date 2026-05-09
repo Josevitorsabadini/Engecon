@@ -22,8 +22,8 @@ aliases:
 | 1 | Ambiente de Desenvolvimento | 1–2 dias | Helmet, CORS, rate limiting, erros | ✅ Concluída |
 | 2 | Autenticação | 1–2 dias | JWT, refresh token, brute-force | ✅ Concluída |
 | 3 | Modelagem e criação do banco | 2–3 dias | Constraints, soft delete, índices, GENERATED | ✅ Concluída |
-| 4 | Módulo: Movimentações | 3–4 dias | Zod, autorização, logs de operação | ⏳ Em andamento |
-| 5 | Módulo: Produtos e Estoque | 2–3 dias | Zod, autorização, logs de operação | — |
+| 4 | Módulo: Movimentações | 3–4 dias | Zod, autorização, logs de operação | ✅ Concluída |
+| 5 | Módulo: Produtos e Estoque | 2–3 dias | Zod, autorização, logs de operação | ⏳ Em andamento |
 | 6 | Módulo: Colaboradores e Alocações | 2–3 dias | Zod, autorização, logs de operação | — |
 | 7 | Painel Admin: Fornecedores, Depósitos, Obras, Usuários | 2–3 dias | Zod, autorização, logs de operação | — |
 | 8 | Dashboard e Resumo Geral | 2 dias | Queries sem expor dados fora do perfil | — |

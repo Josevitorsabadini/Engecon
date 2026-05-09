@@ -46,6 +46,33 @@ aliases:
 
 ## Entradas
 
+## 2026-05-09 — Fase 4 concluída — Módulo Movimentações
+
+**Contexto:** Fase 4 iniciada. Pré-requisitos e módulo completo de movimentações implementados.
+
+**Decisão:**
+1. **`authorize` decorator** criado em `src/app.ts` junto ao `authenticate`. Recebe lista de perfis e retorna 403 se o perfil do usuário autenticado não estiver na lista.
+2. **`createLog` helper** criado em `src/lib/log.ts`. Aceita parâmetro opcional `tx` (cliente de transação Prisma) — permite chamada dentro ou fora de uma transação.
+3. **`createLog` é chamado dentro da transação** que cria a movimentação e atualiza o estoque. Garante que log e operação sejam atômicos — nunca há log sem operação ou operação sem log.
+4. **Proteção contra race condition em `saida`**: em vez de ler o estoque e validar, usa `updateMany` com `WHERE quantidade >= saida`. Se nenhuma linha for atualizada (`count === 0`), retorna 409. Isso evita que duas saídas concorrentes ultrapassem o saldo sem locks explícitos.
+5. **`entrada`** usa `upsert` no estoque — cria o registro se não existir (primeiro entrada do produto) ou incrementa quantidade e atualiza `valorUnitario`.
+6. **`transferencia`** não altera o estoque (quantidade global é preservada). Apenas registra o movimento com origem/destino.
+7. **Filtragem para `leitor`**: campos `quantidade`, `valorUnitario` e `valorTotal` removidos da resposta nas rotas `GET /movimentacoes` e `GET /movimentacoes/:id` quando o perfil é `leitor`.
+
+**Motivo:**
+- Log dentro da transação: auditoria nunca pode divergir da operação real.
+- `updateMany` com WHERE: solução atômica sem precisar de `SELECT FOR UPDATE` explícito — PostgreSQL trava a linha durante o UPDATE, garantindo serialização.
+- `upsert` para entrada: Fase 5 ainda não criou os registros iniciais de estoque; upsert absorve os dois casos sem condicional extra.
+
+**Impacto:**
+- `src/lib/log.ts` — criado
+- `src/app.ts` — import de `movimentacoesRoutes` + decorator `authorize` + registro da rota `/movimentacoes`
+- `src/modules/movimentacoes/movimentacoes.schema.ts` — criado
+- `src/modules/movimentacoes/movimentacoes.service.ts` — criado
+- `src/modules/movimentacoes/movimentacoes.routes.ts` — criado
+
+---
+
 ## 2026-05-08 — Documentação completada para autonomia entre sessões
 
 **Contexto:** Auditoria revelou que a documentação não era suficiente para uma sessão sem contexto iniciar a Fase 4 sem retrabalho.

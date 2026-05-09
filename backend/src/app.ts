@@ -6,10 +6,14 @@ import fastifyCookie from '@fastify/cookie'
 import fastifyJwt from '@fastify/jwt'
 import { errorHandler } from './plugins/error-handler'
 import { authRoutes } from './modules/auth/auth.routes'
+import { movimentacoesRoutes } from './modules/movimentacoes/movimentacoes.routes'
+
+type Perfil = 'leitor' | 'editor' | 'administrador'
 
 declare module 'fastify' {
   interface FastifyInstance {
     authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>
+    authorize: (perfis: Perfil[]) => (request: FastifyRequest, reply: FastifyReply) => Promise<void>
   }
 }
 
@@ -82,9 +86,22 @@ export async function buildApp() {
     }
   })
 
+  app.decorate('authorize', function (perfis: Perfil[]) {
+    return async function (request: FastifyRequest, reply: FastifyReply) {
+      if (!perfis.includes(request.user.perfil)) {
+        reply.status(403).send({
+          statusCode: 403,
+          error: 'Forbidden',
+          message: 'Seu perfil não tem permissão para esta operação.',
+        })
+      }
+    }
+  })
+
   await app.register(authRoutes)
 
   // Fases 4–7 — rotas dos módulos
+  await app.register(movimentacoesRoutes, { prefix: '/movimentacoes' })
 
   app.get('/health', async () => ({ status: 'ok' }))
 
