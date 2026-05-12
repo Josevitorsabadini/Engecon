@@ -18,6 +18,12 @@ aliases:
 
 ## Como Iniciar o Projeto
 
+> [!warning] Pré-requisito: variáveis de ambiente obrigatórias
+> Copie `.env.example` para `.env` e preencha os valores **antes** de rodar o servidor.
+> O servidor **recusa iniciar** se qualquer variável obrigatória estiver ausente — isso é intencional (fail-fast).
+>
+> Variáveis obrigatórias: `DATABASE_URL`, `JWT_SECRET`
+
 ```bash
 cd backend
 npm install         # primeira vez

@@ -51,7 +51,7 @@ aliases:
 - Headers de segurança (**Helmet**)
 - Logs de todas as operações críticas (quem, o quê, quando, em qual registro)
 - Tratamento centralizado de erros — nenhum detalhe interno exposto ao cliente
-- Variáveis de ambiente para tudo que é sensível
+- Variáveis de ambiente para tudo que é sensível — ausência de variável obrigatória causa **falha imediata na inicialização** (fail-fast; sem fallbacks hardcoded no código)
 
 ### Autenticação
 - JWT com expiração curta + refresh token

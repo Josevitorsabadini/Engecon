@@ -46,6 +46,25 @@ aliases:
 
 ## Entradas
 
+## 2026-05-12 — Segurança — JWT_SECRET sem fallback; fail-fast na inicialização
+
+**Contexto:** Security review da Fase 6 identificou que `src/app.ts` usava `process.env.JWT_SECRET ?? 'dev-secret-troque-em-producao'`. O valor do fallback estava commitado no repositório — qualquer pessoa que lesse o código poderia forjar um JWT válido com `perfil: 'administrador'` caso o servidor subisse sem a variável definida.
+
+**Decisão:** Remover o fallback e lançar erro imediato se `JWT_SECRET` não estiver no ambiente:
+```typescript
+const jwtSecret = process.env.JWT_SECRET
+if (!jwtSecret) throw new Error('JWT_SECRET não definido. Configure a variável de ambiente antes de iniciar o servidor.')
+await app.register(fastifyJwt, { secret: jwtSecret })
+```
+
+**Motivo:** Fail-fast é sempre mais seguro que fallback silencioso com valor público. Um erro explícito na inicialização é fácil de diagnosticar; um servidor rodando com secret comprometido pode passar despercebido por tempo indeterminado. O `.env.example` já documentava a variável com placeholder — nenhuma alteração necessária lá.
+
+**Impacto:**
+- `backend/src/app.ts` — fallback `?? 'dev-secret-troque-em-producao'` removido; `throw new Error` se `JWT_SECRET` ausente
+- `.env.example` — inalterado (variável `JWT_SECRET` já estava documentada)
+
+---
+
 ## 2026-05-12 — Fase 6 concluída — Módulo Colaboradores e Alocações
 
 **Contexto:** Fase 6 iniciada. Spec deixava quatro pontos "a definir" e algumas validações FK implícitas.
