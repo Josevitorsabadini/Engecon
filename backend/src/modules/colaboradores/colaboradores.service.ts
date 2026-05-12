@@ -41,8 +41,10 @@ export async function listarColaboradoresService(query: ListarColaboradoresQuery
   const skip = (page - 1) * pageSize
 
   const where = {
-    deletedAt: null as null,
-    ...(status && { status }),
+    ...(status === 'inativo'
+      ? { deletedAt: { not: null as null }, status: 'inativo' as const }
+      : { deletedAt: null as null, ...(status && { status }) }
+    ),
     ...(search && {
       OR: [
         { nome: { contains: search, mode: 'insensitive' as const } },
