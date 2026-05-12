@@ -46,6 +46,40 @@ aliases:
 
 ## Entradas
 
+## 2026-05-12 — Fase 6 concluída — Módulo Colaboradores e Alocações
+
+**Contexto:** Fase 6 iniciada. Spec deixava quatro pontos "a definir" e algumas validações FK implícitas.
+
+**Decisão:**
+1. **CPF é imutável após definido** — em `PATCH /colaboradores/:id`, o campo `cpf` só é aceito se o colaborador ainda não tiver CPF cadastrado. Uma vez definido, qualquer tentativa de alterar retorna 422. Mesmo comportamento que `codigo` em produtos.
+2. **Rota `/alocacoes` de nível superior** — em vez de `/colaboradores/:id/alocacoes`, as alocações vivem em `/alocacoes` com `colaboradorId`/`obraId` como filtros de query (GET) e campos do body (POST). Mais limpo para PATCH/DELETE que precisam do id da alocação, não do colaborador.
+3. **`PATCH /alocacoes/:id` aceita apenas `dataFim`** — escopo deliberadamente estreito: encerrar uma alocação. Qualquer outra mudança exige delete + recriação.
+4. **"Alocações ativas"** em `GET /colaboradores/:id` = `dataFim IS NULL OR dataFim >= hoje` (midnight do dia atual). Definição explícita para evitar ambiguidade.
+5. **`status: 'inativo'` proibido via PATCH** — o schema Zod de atualização aceita apenas `ativo` e `afastado`. Transição para `inativo` é exclusiva do soft-delete (`DELETE /colaboradores/:id`).
+6. **Validações FK antes do insert:**
+   - `POST /colaboradores`: se `usuarioId` fornecido, verifica que o usuário existe e não foi deletado.
+   - `POST /alocacoes`: verifica que o colaborador existe + `status: ativo`; verifica que a obra existe + `status: ativa`.
+7. **`createLog` dentro da transação** em todos os services de escrita (padrão dos módulos anteriores).
+8. **`DELETE /alocacoes/:id` é hard delete** (`prisma.alocacao.delete`) — `Alocacao` não tem `deletedAt` no schema. Operação restrita a `administrador`.
+
+**Motivo:**
+- CPF imutável: coerência com o campo `codigo` de produtos; evita risco de troca acidental de identidade.
+- Rota de nível superior para alocações: rotas aninhadas `/colaboradores/:id/alocacoes/:id` geram ambiguidade de qual `:id` é qual.
+- PATCH restrito a `dataFim`: encerramento de alocação é o único caso de uso esperado; campos como `obraId` ou `dataInicio` só fariam sentido em um "editar completo" que não consta do escopo.
+- Validação de status antes de criar alocação: alocar um colaborador inativo ou em uma obra encerrada seria erro de negócio silencioso.
+
+**Impacto:**
+- `src/modules/colaboradores/colaboradores.schema.ts` — criado
+- `src/modules/colaboradores/colaboradores.service.ts` — criado
+- `src/modules/colaboradores/colaboradores.routes.ts` — criado
+- `src/modules/alocacoes/alocacoes.schema.ts` — criado
+- `src/modules/alocacoes/alocacoes.service.ts` — criado
+- `src/modules/alocacoes/alocacoes.routes.ts` — criado
+- `src/app.ts` — imports e registro de `/colaboradores` e `/alocacoes`
+- `Padrões de Desenvolvimento.md` — registro das duas novas rotas no exemplo de `app.ts`
+
+---
+
 ## 2026-05-09 — Auditoria de consistência código × documentação
 
 **Contexto:** Auditoria completa de todos os arquivos TypeScript do backend e todos os arquivos do Obsidian para identificar divergências entre código e documentação.

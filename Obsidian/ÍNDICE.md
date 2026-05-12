@@ -47,7 +47,7 @@ Login · Dashboard · Resumo Geral · Movimentações · Produtos · Estoque · 
 11 fases — 22 a 33 dias de trabalho ativo → [[Fases]]
 
 ### Fase Atual
-**Fase 6 — Módulo: Colaboradores e Alocações** · Fases 0–5 concluídas
+**Fase 7 — Painel Admin: Fornecedores, Depósitos, Obras, Usuários** · Fases 0–6 concluídas
 
 ---
 

@@ -91,6 +91,8 @@ src/modules/auth/
 await app.register(movimentacoesRoutes, { prefix: '/movimentacoes' })
 await app.register(produtosRoutes,      { prefix: '/produtos' })
 await app.register(estoqueRoutes,       { prefix: '/estoque' })
+await app.register(colaboradoresRoutes, { prefix: '/colaboradores' })
+await app.register(alocacoesRoutes,     { prefix: '/alocacoes' })
 // próximos módulos seguem o mesmo padrão
 ```
 

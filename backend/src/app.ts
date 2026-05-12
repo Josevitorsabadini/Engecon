@@ -9,6 +9,8 @@ import { authRoutes } from './modules/auth/auth.routes'
 import { movimentacoesRoutes } from './modules/movimentacoes/movimentacoes.routes'
 import { produtosRoutes } from './modules/produtos/produtos.routes'
 import { estoqueRoutes } from './modules/estoque/estoque.routes'
+import { colaboradoresRoutes } from './modules/colaboradores/colaboradores.routes'
+import { alocacoesRoutes } from './modules/alocacoes/alocacoes.routes'
 
 type Perfil = 'leitor' | 'editor' | 'administrador'
 
@@ -106,6 +108,8 @@ export async function buildApp() {
   await app.register(movimentacoesRoutes, { prefix: '/movimentacoes' })
   await app.register(produtosRoutes,      { prefix: '/produtos' })
   await app.register(estoqueRoutes,       { prefix: '/estoque' })
+  await app.register(colaboradoresRoutes, { prefix: '/colaboradores' })
+  await app.register(alocacoesRoutes,     { prefix: '/alocacoes' })
 
   app.get('/health', async () => ({ status: 'ok' }))
 
