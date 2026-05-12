@@ -74,9 +74,10 @@ export async function buildApp() {
   // Fase 2 — autenticação
   await app.register(fastifyCookie)
 
-  await app.register(fastifyJwt, {
-    secret: process.env.JWT_SECRET ?? 'dev-secret-troque-em-producao',
-  })
+  const jwtSecret = process.env.JWT_SECRET
+  if (!jwtSecret) throw new Error('JWT_SECRET não definido. Configure a variável de ambiente antes de iniciar o servidor.')
+
+  await app.register(fastifyJwt, { secret: jwtSecret })
 
   app.decorate('authenticate', async function (request: FastifyRequest, reply: FastifyReply) {
     try {
