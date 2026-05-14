@@ -11,6 +11,8 @@ import { produtosRoutes } from './modules/produtos/produtos.routes'
 import { estoqueRoutes } from './modules/estoque/estoque.routes'
 import { colaboradoresRoutes } from './modules/colaboradores/colaboradores.routes'
 import { alocacoesRoutes } from './modules/alocacoes/alocacoes.routes'
+import { fornecedoresRoutes } from './modules/fornecedores/fornecedores.routes'
+import { depositosRoutes } from './modules/depositos/depositos.routes'
 
 type Perfil = 'leitor' | 'editor' | 'administrador'
 
@@ -111,6 +113,8 @@ export async function buildApp() {
   await app.register(estoqueRoutes,       { prefix: '/estoque' })
   await app.register(colaboradoresRoutes, { prefix: '/colaboradores' })
   await app.register(alocacoesRoutes,     { prefix: '/alocacoes' })
+  await app.register(fornecedoresRoutes,  { prefix: '/fornecedores' })
+  await app.register(depositosRoutes,     { prefix: '/depositos' })
 
   app.get('/health', async () => ({ status: 'ok' }))
 
