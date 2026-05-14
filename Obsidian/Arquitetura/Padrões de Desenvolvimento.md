@@ -99,7 +99,10 @@ await app.register(produtosRoutes,      { prefix: '/produtos' })
 await app.register(estoqueRoutes,       { prefix: '/estoque' })
 await app.register(colaboradoresRoutes, { prefix: '/colaboradores' })
 await app.register(alocacoesRoutes,     { prefix: '/alocacoes' })
-// próximos módulos seguem o mesmo padrão
+await app.register(fornecedoresRoutes,  { prefix: '/fornecedores' })
+await app.register(depositosRoutes,     { prefix: '/depositos' })
+await app.register(obrasRoutes,         { prefix: '/obras' })
+await app.register(usuariosRoutes,      { prefix: '/usuarios' })
 ```
 
 ### Imports padrão de um service
@@ -158,6 +161,97 @@ await prisma.$transaction(async (tx) => {
   await createLog({ usuarioId, acao: 'criar', tabelaAfetada: 'produtos', registroId: novo.id }, tx)
   return novo
 })
+```
+
+---
+
+## Padrões de Segurança — implementados na Fase 7
+
+> [!success] Estes padrões existem no codebase desde a Fase 7
+
+### 3. `SELECT_SEM_SENHA` — campos sensíveis nunca retornados
+
+**Arquivo:** `src/modules/usuarios/usuarios.service.ts`
+
+**O que faz:** constante `as const` com os campos explícitos permitidos. Passar em `select` de qualquer query garante em compilação que `senhaHash` nunca aparece na resposta.
+
+**Quando usar:** em todo service que lê da tabela `usuarios` — findFirst, findMany e update.
+
+**Declaração:**
+```typescript
+const SELECT_SEM_SENHA = {
+  id: true, nome: true, email: true, perfil: true,
+  ativo: true, createdAt: true, updatedAt: true, deletedAt: true,
+} as const
+```
+
+**Uso:**
+```typescript
+prisma.usuario.findMany({ where, select: SELECT_SEM_SENHA })
+```
+
+---
+
+### 4. `toDate()` — conversão de data YYYY-MM-DD para Prisma
+
+**Arquivo:** `src/modules/obras/obras.service.ts`
+
+**O que faz:** converte string YYYY-MM-DD em `Date` (ou retorna `undefined` se o valor não foi informado). Necessário porque campos `DATE` no banco usam `Date` no Prisma, mas a API recebe e valida strings.
+
+**Quando usar:** em qualquer service que trate campos de data opcionais que chegam como string da API.
+
+**Declaração:**
+```typescript
+function toDate(value: string | undefined): Date | undefined {
+  return value ? new Date(value) : undefined
+}
+```
+
+**Uso (conditional spread em PATCH):**
+```typescript
+data: {
+  ...(data.dataInicio      !== undefined && { dataInicio:      toDate(data.dataInicio) }),
+  ...(data.dataPrevisaoFim !== undefined && { dataPrevisaoFim: toDate(data.dataPrevisaoFim) }),
+  ...(data.dataFim         !== undefined && { dataFim:         toDate(data.dataFim) }),
+}
+```
+
+> [!tip] Validação no schema
+> Zod valida antes da conversão: `z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'data deve estar no formato YYYY-MM-DD.')`. `toDate()` só é chamado quando o valor já passou pela validação.
+
+---
+
+### 5. `verificarUltimoAdmin()` — guard de último recurso
+
+**Arquivo:** `src/modules/usuarios/usuarios.service.ts`
+
+**O que faz:** conta administradores ativos excluindo o alvo da operação. Se o resultado seria zero, lança `AppError` com 403.
+
+**Quando usar:** antes de qualquer operação que remove ou rebaixa um `administrador` ativo — soft delete (`DELETE /:id`) e PATCH que altera `perfil` para não-admin ou define `ativo: false`.
+
+**Declaração:**
+```typescript
+async function verificarUltimoAdmin(excluirId: string) {
+  const count = await prisma.usuario.count({
+    where: { perfil: 'administrador', ativo: true, deletedAt: null, id: { not: excluirId } },
+  })
+  if (count === 0) {
+    throw new AppError('Não é possível remover ou rebaixar o único administrador ativo do sistema.', 403)
+  }
+}
+```
+
+**Uso em `inativarUsuarioService`:**
+```typescript
+if (usuario.perfil === 'administrador') await verificarUltimoAdmin(id)
+```
+
+**Uso em `atualizarUsuarioService`:**
+```typescript
+if (usuario.perfil === 'administrador') {
+  const removendoAdmin = (data.perfil !== undefined && data.perfil !== 'administrador') || data.ativo === false
+  if (removendoAdmin) await verificarUltimoAdmin(id)
+}
 ```
 
 ---

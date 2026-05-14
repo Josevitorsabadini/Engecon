@@ -105,6 +105,57 @@ CRUD de colaboradores + gerenciamento de alocações por obra e período.
 ### Fase 7 — Painel Administrativo *(2–3 dias)*
 CRUD de fornecedores, depósitos, obras e usuários. Acesso restrito ao perfil `administrador`.
 
+#### O que foi implementado
+
+**Fornecedores** (`/fornecedores`)
+- `POST /` — cria fornecedor; `cnpjCpf` opcional mas único quando presente; fornecedor inativo com mesmo CNPJ/CPF → mensagem orienta reativação
+- `GET /` — paginado; `search` busca em nome e cnpjCpf
+- `GET /:id` — busca por id (sem soft-deleted)
+- `PATCH /:id` — atualiza qualquer campo; conflito de `cnpjCpf` verificado apenas se o novo valor difere do atual
+- `DELETE /:id` — soft delete (`deletedAt`)
+
+**Depósitos** (`/depositos`)
+- `POST /` — cria depósito (nome obrigatório, descrição opcional)
+- `GET /` — paginado; `search` busca em nome
+- `GET /:id` — busca por id
+- `PATCH /:id` — atualiza nome e/ou descrição
+- `DELETE /:id` — soft delete
+
+**Obras** (`/obras`)
+- `POST /` — cria obra; datas validadas como string YYYY-MM-DD; `status` default `ativa`
+- `GET /` — paginado; filtro por `status`; `search` busca em nome
+- `GET /:id` — inclui alocações ativas (`dataFim IS NULL OR dataFim >= hoje`) com nome e cargo do colaborador
+- `PATCH /:id` — atualização parcial via conditional spread
+- `DELETE /:id` — soft delete
+
+**Usuários** (`/usuarios`)
+- `POST /` — cria usuário; senha hasheada (bcrypt 10 rounds); email único; conta inativa com mesmo e-mail → mensagem orienta reativação; retorna sem `senhaHash`
+- `GET /` — paginado; filtro por `perfil`; `search` busca em nome e email; retorna sem `senhaHash`
+- `GET /:id` — retorna sem `senhaHash`
+- `PATCH /:id` — atualiza nome, perfil, ativo, senha; hash calculado fora da transação; retorna sem `senhaHash`
+- `DELETE /:id` — soft delete; define `ativo: false` além de `deletedAt`
+
+#### Regras de negócio
+
+**Autorização**
+Todos os endpoints dos quatro módulos exigem `administrador`. Nenhuma granularidade por perfil dentro da Fase 7 — painel admin é acesso integral ou nenhum.
+
+**Obras — datas**
+Datas (`dataInicio`, `dataPrevisaoFim`, `dataFim`) trafegam como string YYYY-MM-DD na API. Zod valida com regex; `toDate()` converte para `Date` antes do Prisma. "Hoje" para filtro de alocações ativas é calculado com `setHours(0, 0, 0, 0)` para comparação por dia inteiro.
+
+**Usuários — proteções de integridade**
+
+| Regra | Operação bloqueada | Código |
+|---|---|---|
+| Não excluir a si mesmo | `DELETE /:id` onde `id === solicitanteId` | 403 |
+| Não desativar a si mesmo | `PATCH /:id { ativo: false }` onde `id === solicitanteId` | 403 |
+| Não rebaixar o próprio perfil | `PATCH /:id { perfil: 'leitor'\|'editor' }` onde `id === solicitanteId` | 403 |
+| Último administrador | Qualquer PATCH ou DELETE que tornaria `administradores ativos = 0` | 403 |
+
+**Usuários — segurança de dados**
+- `senhaHash` nunca retornada — constante `SELECT_SEM_SENHA` (`as const`) usada em todas as queries de leitura da tabela
+- `bcrypt.hash` calculado **antes** do `prisma.$transaction` — operação CPU-bound; não deve segurar conexão do pool
+
 ### Fase 8 — Dashboard e Resumo Geral *(2 dias)*
 Queries agregadas para KPIs — devem respeitar o perfil do usuário (sem expor dados além do permitido).
 
