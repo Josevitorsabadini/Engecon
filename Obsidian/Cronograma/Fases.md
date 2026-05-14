@@ -159,6 +159,26 @@ Datas (`dataInicio`, `dataPrevisaoFim`, `dataFim`) trafegam como string YYYY-MM-
 ### Fase 8 — Dashboard e Resumo Geral *(2 dias)*
 Queries agregadas para KPIs — devem respeitar o perfil do usuário (sem expor dados além do permitido).
 
+> [!question] Pontos a definir antes de implementar
+> As três questões abaixo precisam de decisão explícita do usuário **antes** de qualquer código ser escrito.
+>
+> **1. Quais KPIs exatamente?**
+> O escopo define "movimentações, estoque e obras" sem granularidade. Exemplos a confirmar:
+> - Estoque: valor total em estoque, produtos com quantidade zero, produtos abaixo de um mínimo?
+> - Movimentações: total de entradas/saídas no período, últimas N movimentações?
+> - Obras: contagem por status (ativas / pausadas / encerradas), colaboradores alocados atualmente?
+> - Colaboradores: total ativos, total afastados?
+>
+> **2. Regra de perfil por KPI**
+> `leitor` não vê dados numéricos (valores, quantidades) — a regra se aplica aos KPIs da mesma forma?
+> Ou o dashboard tem acesso mínimo diferente (ex: leitor vê contagens mas não valores)?
+> Precisa decisão: retorno ramificado por perfil ou campos omitidos conforme JWT.
+>
+> **3. Estrutura dos endpoints**
+> - Opção A: um único `GET /dashboard` retorna tudo de uma vez
+> - Opção B: endpoints separados por domínio (`GET /dashboard/estoque`, `GET /dashboard/obras`, etc.) — mais flexível para o frontend carregar partes independentemente
+> - Opção C: híbrido — um endpoint de resumo geral + endpoints de detalhe por área
+
 ### Fase 9 — Frontend React Integrado *(5–10 dias)*
 Integração completa do React com a API. Proteção de rotas por perfil, httpOnly cookie para token, sanitização de inputs.
 
