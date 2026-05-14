@@ -25,8 +25,8 @@ aliases:
 | 4 | Módulo: Movimentações | 3–4 dias | Zod, autorização, logs de operação | ✅ Concluída |
 | 5 | Módulo: Produtos e Estoque | 2–3 dias | Zod, autorização, logs de operação | ✅ Concluída |
 | 6 | Módulo: Colaboradores e Alocações | 2–3 dias | Zod, autorização, logs de operação | ✅ Concluída |
-| 7 | Painel Admin: Fornecedores, Depósitos, Obras, Usuários | 2–3 dias | Zod, autorização, logs de operação | ⏳ Em andamento |
-| 8 | Dashboard e Resumo Geral | 2 dias | Queries sem expor dados fora do perfil | — |
+| 7 | Painel Admin: Fornecedores, Depósitos, Obras, Usuários | 2–3 dias | Zod, autorização, logs de operação | ✅ Concluída |
+| 8 | Dashboard e Resumo Geral | 2 dias | Queries sem expor dados fora do perfil | ⏳ Em andamento |
 | 9 | Frontend React Integrado | 5–10 dias | Rotas protegidas, httpOnly cookie | — |
 | 10 | Testes e Preparação para Deploy | 2–3 dias | Pen test básico, hardening VPS | — |
 

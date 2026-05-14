@@ -46,6 +46,35 @@ aliases:
 
 ## Entradas
 
+## 2026-05-14 — Fase 7 concluída — Painel Administrativo (Fornecedores, Depósitos, Obras, Usuários)
+
+**Contexto:** Fase 7 iniciada. Quatro módulos de CRUD exclusivos do perfil `administrador`.
+
+**Decisão:**
+1. **Todos os endpoints da Fase 7 exigem `administrador`** — `preHandler: [app.authenticate, app.authorize(['administrador'])]` em todas as rotas dos quatro módulos. Os módulos anteriores tinham granularidade por perfil; o painel admin é acesso total.
+2. **Datas de obras como string YYYY-MM-DD** — `criarObraSchema` e `atualizarObraSchema` usam `z.string().regex(/^\d{4}-\d{2}-\d{2}$/)`. Um helper `toDate(value)` converte para `Date` antes do Prisma. Evita ambiguidade de fuso horário em `z.coerce.date()`.
+3. **`buscarObraService` inclui alocações ativas** — a query de `GET /obras/:id` faz `include.alocacoes` com filtro `dataFim: null OR dataFim >= hoje`. `hoje` tem horário zerizado para comparação por dia inteiro. O `include` traz `colaborador.{ id, nome, cargo }` — sem dados sensíveis.
+4. **`SELECT_SEM_SENHA` em todos os retornos de usuário** — constante `as const` com os campos explícitos passa em todas as queries. `senhaHash` nunca aparece em nenhuma resposta da API de usuários.
+5. **bcrypt fora da transação** — `bcrypt.hash` é CPU-bound; calculado antes do `prisma.$transaction` para não segurar a conexão do pool durante o hashing.
+6. **Soft delete de usuário define `ativo: false` além de `deletedAt`** — `inativarUsuarioService` faz `{ deletedAt: new Date(), ativo: false }`. Evita inconsistência onde o campo booleano `ativo` diz `true` mas `deletedAt` indica deleção.
+7. **Proteção contra auto-bloqueio** — `atualizarUsuarioService` recusa `{ ativo: false }` quando `id === solicitanteId`. Cobre a brecha que permitia bypass do guard de `DELETE /:id` via PATCH.
+8. **Proteção do último administrador** — helper `verificarUltimoAdmin(id)` conta `{ perfil: 'administrador', ativo: true, deletedAt: null, id: { not: id } }`. Chamado antes de qualquer operação que remova ou rebaixe um admin (demoção via PATCH `perfil`, desativação via PATCH `ativo: false`, e soft delete via DELETE). Lança 403 se o resultado seria zero admins.
+
+**Motivo:**
+- Admin-only: painel de configuração não deve estar acessível a editores ou leitores por nenhum caso de uso atual.
+- YYYY-MM-DD regex: datas de texto são mais previsíveis que `z.coerce.date()` com múltiplos formatos de entrada; o helper centraliza a conversão.
+- `SELECT_SEM_SENHA` como constante: garante em tempo de compilação que nenhuma query de leitura inclui o hash acidentalmente.
+- Guards de auto-bloqueio e último admin: sem eles, um administrador poderia acidentalmente (ou maliciosamente) tornar o sistema ingerenciável sem nenhum usuário admin ativo.
+
+**Impacto:**
+- `src/modules/fornecedores/` — criado (schema + service + routes)
+- `src/modules/depositos/` — criado (schema + service + routes)
+- `src/modules/obras/` — criado (schema + service + routes)
+- `src/modules/usuarios/` — criado (schema + service + routes)
+- `src/app.ts` — imports e registro de `/fornecedores`, `/depositos`, `/obras`, `/usuarios`
+
+---
+
 ## 2026-05-12 — Segurança — JWT_SECRET sem fallback; fail-fast na inicialização
 
 **Contexto:** Security review da Fase 6 identificou que `src/app.ts` usava `process.env.JWT_SECRET ?? 'dev-secret-troque-em-producao'`. O valor do fallback estava commitado no repositório — qualquer pessoa que lesse o código poderia forjar um JWT válido com `perfil: 'administrador'` caso o servidor subisse sem a variável definida.
