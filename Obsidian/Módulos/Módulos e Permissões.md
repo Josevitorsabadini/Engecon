@@ -33,8 +33,8 @@ aliases:
 |---|---|---|---|
 | Portal de Login | ✓ autenticação | ✓ autenticação | ✓ autenticação |
 | Dashboard Principal | ✓ leitura (sem valores) | ✓ leitura total | ✓ leitura total |
-| Resumo Geral (KPIs) | ✗ (dados numéricos) | ✓ leitura | ✓ leitura |
-| Movimentações | ✓ leitura (sem valores) | ✓ leitura + escrita | ✓ leitura + escrita |
+| Dashboard — KPIs de obras | ✓ leitura (só contagens) | ✓ leitura total | ✓ leitura total |
+| Movimentações | ✓ leitura (sem valores) | ✓ leitura + escrita + pedidos | ✓ leitura + escrita + pedidos |
 | Produtos | ✓ leitura (sem valores) | ✓ leitura + escrita | ✓ leitura + escrita |
 | Estoque | ✓ leitura (sem valores) | ✓ leitura + escrita | ✓ leitura + escrita |
 | Colaboradores | ✓ leitura (sem diárias) | ✓ leitura + escrita | ✓ leitura + escrita |
@@ -50,12 +50,12 @@ Autenticação do usuário com redirecionamento automático para a tela correta 
 ### Dashboard Principal
 Tela central de navegação. Ponto de entrada após o login — links para todos os módulos disponíveis ao perfil do usuário.
 
-### Resumo Geral
-KPIs consolidados de movimentações, estoque e obras. Exige dados numéricos — inacessível para `leitor`.
+### Dashboard — KPIs de obras
+Cards por obra com quatro KPIs: pedidos pendentes, pedidos para hoje, pedidos atrasados e colaboradores ativos. Os KPIs são contagens — sem valores monetários — e por isso acessíveis a todos os perfis incluindo `leitor`. Endpoints: `GET /dashboard/obras` e `GET /dashboard/obras/:id`.
 
 ### Movimentações
-Registro de entradas, saídas e transferências de materiais.
-Campos: produto, quantidade, valor unitário, valor total (gerado), origem (obra/fornecedor/depósito), destino (obra/fornecedor/depósito).
+Registro de entradas, saídas, transferências e ajustes manuais de estoque. Inclui também **pedidos pendentes**: saídas futuras vinculadas a uma obra com `data_necessidade`. Editor e administrador criam e confirmam pedidos. Leitor vê a listagem (sem valores).
+Campos: produto, quantidade, valor unitário, valor total (gerado), status (confirmada/pendente), data de necessidade, origem (obra/fornecedor/depósito), destino.
 
 ### Produtos
 Catálogo de materiais: cadastro, edição e inativação.

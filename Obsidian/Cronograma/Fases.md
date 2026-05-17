@@ -26,7 +26,7 @@ aliases:
 | 5 | Módulo: Produtos e Estoque | 2–3 dias | Zod, autorização, logs de operação | ✅ Concluída |
 | 6 | Módulo: Colaboradores e Alocações | 2–3 dias | Zod, autorização, logs de operação | ✅ Concluída |
 | 7 | Painel Admin: Fornecedores, Depósitos, Obras, Usuários | 2–3 dias | Zod, autorização, logs de operação | ✅ Concluída |
-| 8 | Dashboard e Resumo Geral | 2 dias | Queries sem expor dados fora do perfil | ⏳ Em andamento |
+| 8 | Pedidos Pendentes + Dashboard | 3–4 dias | Queries sem expor dados fora do perfil | ⏳ Em andamento |
 | 9 | Frontend React Integrado | 5–10 dias | Rotas protegidas, httpOnly cookie | — |
 | 10 | Testes e Preparação para Deploy | 2–3 dias | Pen test básico, hardening VPS | — |
 
@@ -156,28 +156,37 @@ Datas (`dataInicio`, `dataPrevisaoFim`, `dataFim`) trafegam como string YYYY-MM-
 - `senhaHash` nunca retornada — constante `SELECT_SEM_SENHA` (`as const`) usada em todas as queries de leitura da tabela
 - `bcrypt.hash` calculado **antes** do `prisma.$transaction` — operação CPU-bound; não deve segurar conexão do pool
 
-### Fase 8 — Dashboard e Resumo Geral *(2 dias)*
-Queries agregadas para KPIs — devem respeitar o perfil do usuário (sem expor dados além do permitido).
+### Fase 8 — Pedidos Pendentes + Dashboard *(3–4 dias)*
+Extensão de `movimentacoes` com pedidos pendentes de saída + endpoints de KPIs por obra para o dashboard.
 
-> [!question] Pontos a definir antes de implementar
-> As três questões abaixo precisam de decisão explícita do usuário **antes** de qualquer código ser escrito.
->
-> **1. Quais KPIs exatamente?**
-> O escopo define "movimentações, estoque e obras" sem granularidade. Exemplos a confirmar:
-> - Estoque: valor total em estoque, produtos com quantidade zero, produtos abaixo de um mínimo?
-> - Movimentações: total de entradas/saídas no período, últimas N movimentações?
-> - Obras: contagem por status (ativas / pausadas / encerradas), colaboradores alocados atualmente?
-> - Colaboradores: total ativos, total afastados?
->
-> **2. Regra de perfil por KPI**
-> `leitor` não vê dados numéricos (valores, quantidades) — a regra se aplica aos KPIs da mesma forma?
-> Ou o dashboard tem acesso mínimo diferente (ex: leitor vê contagens mas não valores)?
-> Precisa decisão: retorno ramificado por perfil ou campos omitidos conforme JWT.
->
-> **3. Estrutura dos endpoints**
-> - Opção A: um único `GET /dashboard` retorna tudo de uma vez
-> - Opção B: endpoints separados por domínio (`GET /dashboard/estoque`, `GET /dashboard/obras`, etc.) — mais flexível para o frontend carregar partes independentemente
-> - Opção C: híbrido — um endpoint de resumo geral + endpoints de detalhe por área
+#### O que foi implementado
+
+**Extensão de `movimentacoes` — pedidos pendentes**
+- Novo enum `status_movimentacao`: `confirmada | pendente`
+- Novas colunas em `movimentacoes`: `status` (default `confirmada`) e `data_necessidade` (DATE)
+- Migration: `20260517000000_add_pedidos_movimentacoes`
+- `POST /movimentacoes` com `status: 'pendente'` → registra pedido sem tocar o estoque
+- `PATCH /movimentacoes/:id/confirmar` → aplica saída no estoque + muda status para `confirmada`
+- `GET /movimentacoes` aceita novo filtro `status` e `obraId`
+
+**Restrições de pedido pendente**
+- Apenas `tipo: 'saida'` pode ser `pendente` (`transferencia` e `ajuste` são sempre imediatos)
+- `obraId` e `dataNecessidade` obrigatórios para pedidos pendentes
+- Confirmar pedido: `editor` ou `administrador`
+
+**Dashboard** (`/dashboard`)
+- `GET /dashboard/obras` — todas as obras com KPIs (filtro por `status`)
+- `GET /dashboard/obras/:id` — KPIs de uma obra específica
+- KPIs calculados por obra:
+  - `pendentes` — total de pedidos pendentes
+  - `paraHoje` — pedidos com `data_necessidade = hoje`
+  - `atrasados` — pedidos com `data_necessidade < hoje` (vencidos)
+  - `colaboradores` — alocações ativas (`dataFim IS NULL OR dataFim >= hoje`)
+- Todos os perfis acessam (leitor vê contagens, sem valores monetários)
+- 5 queries paralelas com `groupBy` — eficiente independente do número de obras
+
+#### Decisões tomadas
+Ver entrada completa em [[Decisões e Alterações]] — 2026-05-17.
 
 ### Fase 9 — Frontend React Integrado *(5–10 dias)*
 Integração completa do React com a API. Proteção de rotas por perfil, httpOnly cookie para token, sanitização de inputs.

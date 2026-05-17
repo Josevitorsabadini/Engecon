@@ -50,6 +50,13 @@ enum TipoEntidade {
   @@map("tipo_entidade")
 }
 
+enum StatusMovimentacao {
+  confirmada
+  pendente
+
+  @@map("status_movimentacao")
+}
+
 // ─────────────────────────────────────────
 // Models
 // ─────────────────────────────────────────
@@ -192,24 +199,26 @@ model Estoque {
 }
 
 model Movimentacao {
-  id            String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tipo          TipoMovimentacao
-  produtoId     String           @map("produto_id") @db.Uuid
-  quantidade    Decimal          @db.Decimal
-  valorUnitario Decimal          @map("valor_unitario") @db.Decimal
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tipo            TipoMovimentacao
+  status          StatusMovimentacao @default(confirmada)
+  produtoId       String             @map("produto_id") @db.Uuid
+  quantidade      Decimal            @db.Decimal
+  valorUnitario   Decimal            @map("valor_unitario") @db.Decimal
   // GENERATED ALWAYS AS (quantidade * valor_unitario) STORED — nunca escrever diretamente
-  valorTotal    Decimal          @default(dbgenerated("(quantidade * valor_unitario)")) @map("valor_total") @db.Decimal
-  origemTipo    TipoEntidade?    @map("origem_tipo")
-  origemId      String?          @map("origem_id") @db.Uuid
-  destinoTipo   TipoEntidade?    @map("destino_tipo")
-  destinoId     String?          @map("destino_id") @db.Uuid
-  obraId        String?          @map("obra_id") @db.Uuid
-  fornecedorId  String?          @map("fornecedor_id") @db.Uuid
-  observacoes   String?
-  realizadoPor  String           @map("realizado_por") @db.Uuid
-  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
-  deletedAt     DateTime?        @map("deleted_at") @db.Timestamptz(6)
+  valorTotal      Decimal            @default(dbgenerated("(quantidade * valor_unitario)")) @map("valor_total") @db.Decimal
+  origemTipo      TipoEntidade?      @map("origem_tipo")
+  origemId        String?            @map("origem_id") @db.Uuid
+  destinoTipo     TipoEntidade?      @map("destino_tipo")
+  destinoId       String?            @map("destino_id") @db.Uuid
+  obraId          String?            @map("obra_id") @db.Uuid
+  fornecedorId    String?            @map("fornecedor_id") @db.Uuid
+  dataNecessidade DateTime?          @map("data_necessidade") @db.Date
+  observacoes     String?
+  realizadoPor    String             @map("realizado_por") @db.Uuid
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime?          @map("deleted_at") @db.Timestamptz(6)
 
   produto    Produto     @relation(fields: [produtoId], references: [id])
   obra       Obra?       @relation(fields: [obraId], references: [id])
@@ -222,6 +231,8 @@ model Movimentacao {
   @@index([createdAt], map: "idx_movimentacoes_created")
   @@index([origemTipo, origemId], map: "idx_movimentacoes_origem")
   @@index([destinoTipo, destinoId], map: "idx_movimentacoes_destino")
+  @@index([status], map: "idx_movimentacoes_status")
+  @@index([obraId, status, dataNecessidade], map: "idx_movimentacoes_obra_kpi")
   @@map("movimentacoes")
 }
 

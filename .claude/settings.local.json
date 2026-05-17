@@ -22,7 +22,8 @@
       "PowerShell(Get-ChildItem *)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\tunud\\\\Downloads\\\\Engecon projeto\\\\Engecon\" -Depth 1 -File -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\tunud\\\\Downloads\\\\Engecon projeto\\\\Engecon\" -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -notmatch \"node_modules|\\\\.next|\\\\.git|Obsidian\" } | Select-Object -ExpandProperty Name)",
-      "Bash(timeout 8 npm run dev)"
+      "Bash(timeout 8 npm run dev)",
+      "Bash(npm run *)"
     ]
   }
 }

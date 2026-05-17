@@ -46,6 +46,37 @@ aliases:
 
 ## Entradas
 
+## 2026-05-17 — Fase 8 — Pedidos pendentes em movimentações + Dashboard de obras
+
+**Contexto:** Fase 8 iniciada. O escopo original era "Dashboard e Resumo Geral" sobre dados existentes. O design do frontend revelou a necessidade de KPIs por obra (pedidos pendentes, atrasados, colaboradores ativos) — o que exigiu estender `movimentacoes` com o conceito de pedido futuro antes de criar o dashboard.
+
+**Decisão:**
+1. **Pedidos como `status: 'pendente'` em `movimentacoes`** — sem tabela nova. Dois campos adicionados à tabela existente: `status status_movimentacao NOT NULL DEFAULT 'confirmada'` e `data_necessidade DATE`. Todos os registros existentes herdam `confirmada` automaticamente.
+2. **Apenas `saida` pode ser `pendente`** — `transferencia` e `ajuste` são sempre imediatos por natureza. `entrada` também (compra de fornecedor é registrada quando ocorre, não planejada via pedido).
+3. **`data_necessidade` obrigatória para pedidos pendentes** — substitui um campo manual de "urgência". A urgência é derivada em query-time: `< hoje` = atrasado, `= hoje` = para hoje. Nenhum campo extra de prioridade necessário.
+4. **`obraId` obrigatório para pedidos pendentes** — todo pedido é vinculado a uma obra (os KPIs são calculados por obra).
+5. **Confirmação via `PATCH /movimentacoes/:id/confirmar`** — aplica a lógica de saída de estoque (com proteção contra race condition via `updateMany WHERE quantidade >= saida`) e atualiza `valorUnitario` com o preço atual do estoque no momento da confirmação. Tudo em uma transação com `createLog`.
+6. **Dashboard: 5 queries paralelas com `groupBy`** — para listar todas as obras com KPIs, o service executa 5 queries em `Promise.all` (`obras` + 4 `groupBy`). Resultado: N obras = sempre 5 queries, não N×4.
+7. **KPIs acessíveis a todos os perfis** — o dashboard exibe contagens (não valores monetários), o que é compatível com a restrição de `leitor`.
+8. **`confirmarPedidoService` atualiza `valorUnitario`** — o preço estimado ao criar o pedido é substituído pelo `valorUnitario` real do estoque no momento da confirmação, garantindo que `valor_total` (coluna gerada) reflita o valor correto da saída.
+
+**Motivo:**
+- Pedido como extensão de `movimentacoes`: sem duplicidade de dados, auditoria centralizada, o fluxo de movimentações permanece a única fonte de verdade sobre materiais.
+- `data_necessidade` como proxy de urgência: urgência automática (não depende de intervenção humana), evolui com o tempo, sem campo redundante.
+- `groupBy` no dashboard: eficiente para qualquer número de obras, evita N+1 queries.
+
+**Impacto:**
+- `prisma/migrations/20260517000000_add_pedidos_movimentacoes/migration.sql` — criado (aplicar no Supabase)
+- `prisma/schema.prisma` — enum `StatusMovimentacao` + campos `status` e `dataNecessidade` em `Movimentacao` + 2 novos índices
+- `src/modules/movimentacoes/movimentacoes.schema.ts` — novos campos `status`, `dataNecessidade`; filtros `status` e `obraId` em listagem
+- `src/modules/movimentacoes/movimentacoes.service.ts` — branch `pendente` em `criarMovimentacaoService`; novo `confirmarPedidoService`
+- `src/modules/movimentacoes/movimentacoes.routes.ts` — novo `PATCH /:id/confirmar`; filtros adicionais em `GET /`
+- `src/modules/dashboard/` — criado (schema + service + routes)
+- `src/app.ts` — registro de `/dashboard`
+- Documentação: `Banco.sql.md`, `Relacionamentos.md`, `Fases.md` atualizados
+
+---
+
 ## 2026-05-14 — Fase 7 concluída — Painel Administrativo (Fornecedores, Depósitos, Obras, Usuários)
 
 **Contexto:** Fase 7 iniciada. Quatro módulos de CRUD exclusivos do perfil `administrador`.

@@ -77,6 +77,6 @@ aliases:
 | 2 | JWT + refresh token, middleware de auth, brute-force, testes de token |
 | 3 | Constraints no banco, tipos corretos, soft delete, índices, colunas geradas |
 | 4–7 | Zod em todos os inputs, autorização por rota, log de cada operação |
-| 8 | Queries agregadas sem expor dados além do perfil |
+| 8 | Pedidos pendentes em movimentações + KPIs de obras no dashboard (contagens por perfil) |
 | 9 | Rotas protegidas no React, httpOnly cookie, sem dados sensíveis no cliente |
 | 10 | Revisão geral, testes básicos de penetração, checklist de hardening para VPS |

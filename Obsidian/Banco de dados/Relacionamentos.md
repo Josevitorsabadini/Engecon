@@ -109,4 +109,8 @@ idx_movimentacoes_tipo     ON movimentacoes(tipo)
 idx_movimentacoes_created  ON movimentacoes(created_at)
 idx_movimentacoes_origem   ON movimentacoes(origem_tipo, origem_id)
 idx_movimentacoes_destino  ON movimentacoes(destino_tipo, destino_id)
+
+-- Fase 8 — KPIs do dashboard (pedidos pendentes por obra)
+idx_movimentacoes_status   ON movimentacoes(status)
+idx_movimentacoes_obra_kpi ON movimentacoes(obra_id, status, data_necessidade)
 ```

@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import { criarMovimentacaoSchema, listarMovimentacoesQuerySchema } from './movimentacoes.schema'
 import {
   criarMovimentacaoService,
+  confirmarPedidoService,
   listarMovimentacoesService,
   buscarMovimentacaoService,
 } from './movimentacoes.service'
@@ -20,21 +21,38 @@ export async function movimentacoesRoutes(app: FastifyInstance) {
     if (!parsed.success) {
       return reply.status(400).send({
         statusCode: 400,
-        error: 'Bad Request',
-        message: parsed.error.issues[0]?.message ?? 'Dados inválidos na requisição.',
+        error:      'Bad Request',
+        message:    parsed.error.issues[0]?.message ?? 'Dados inválidos na requisição.',
       })
     }
 
     if (parsed.data.tipo === 'ajuste' && request.user.perfil !== 'administrador') {
       return reply.status(403).send({
         statusCode: 403,
-        error: 'Forbidden',
-        message: 'Apenas administradores podem realizar ajustes manuais de estoque.',
+        error:      'Forbidden',
+        message:    'Apenas administradores podem realizar ajustes manuais de estoque.',
       })
     }
 
     const movimentacao = await criarMovimentacaoService(parsed.data, request.user.sub)
     return reply.status(201).send(movimentacao)
+  })
+
+  app.patch('/:id/confirmar', {
+    preHandler: [app.authenticate, app.authorize(['editor', 'administrador'])],
+  }, async (request, reply) => {
+    const { id } = request.params as { id: string }
+
+    if (!id || !/^[0-9a-f-]{36}$/.test(id)) {
+      return reply.status(400).send({
+        statusCode: 400,
+        error:      'Bad Request',
+        message:    'ID inválido.',
+      })
+    }
+
+    const movimentacao = await confirmarPedidoService(id, request.user.sub)
+    return reply.send(movimentacao)
   })
 
   app.get('/', {
@@ -44,8 +62,8 @@ export async function movimentacoesRoutes(app: FastifyInstance) {
     if (!parsed.success) {
       return reply.status(400).send({
         statusCode: 400,
-        error: 'Bad Request',
-        message: parsed.error.issues[0]?.message ?? 'Parâmetros de filtro inválidos.',
+        error:      'Bad Request',
+        message:    parsed.error.issues[0]?.message ?? 'Parâmetros de filtro inválidos.',
       })
     }
 
@@ -68,8 +86,8 @@ export async function movimentacoesRoutes(app: FastifyInstance) {
     if (!id || !/^[0-9a-f-]{36}$/.test(id)) {
       return reply.status(400).send({
         statusCode: 400,
-        error: 'Bad Request',
-        message: 'ID inválido.',
+        error:      'Bad Request',
+        message:    'ID inválido.',
       })
     }
 

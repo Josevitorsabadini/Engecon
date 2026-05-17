@@ -69,7 +69,8 @@ Definidas em `.env` via `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`. Padrão do `
 |---|---|---|
 | `npm run db:resolve` | `20260507000000_initial` | Schema completo (todas as tabelas, enums, índices) |
 | `npm run db:resolve:2` | `20260507000001_add_refresh_tokens` | Tabela `refresh_tokens` |
-| `npm run db:resolve:3` | `20260509000000_add_ajuste_tipo_movimentacao` | Adiciona `ajuste` ao CHECK constraint de `movimentacoes.tipo` |
+| `npm run db:resolve:3` | `20260509000000_add_ajuste_tipo_movimentacao` | Adiciona `ajuste` ao enum `tipo_movimentacao` |
+| `npm run db:resolve:4` | `20260517000000_add_pedidos_movimentacoes` | Enum `status_movimentacao` + colunas `status` e `data_necessidade` em `movimentacoes` |
 
 ---
 
@@ -103,6 +104,7 @@ await app.register(fornecedoresRoutes,  { prefix: '/fornecedores' })
 await app.register(depositosRoutes,     { prefix: '/depositos' })
 await app.register(obrasRoutes,         { prefix: '/obras' })
 await app.register(usuariosRoutes,      { prefix: '/usuarios' })
+await app.register(dashboardRoutes,     { prefix: '/dashboard' })
 ```
 
 ### Imports padrão de um service

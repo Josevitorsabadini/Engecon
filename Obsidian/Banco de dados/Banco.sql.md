@@ -22,11 +22,12 @@ aliases:
 -- ─────────────────────────────────────────
 
 -- ENUM TYPES
-CREATE TYPE "Perfil"             AS ENUM ('leitor', 'editor', 'administrador');
-CREATE TYPE "status_colaborador" AS ENUM ('ativo', 'inativo', 'afastado');
-CREATE TYPE "status_obra"        AS ENUM ('ativa', 'pausada', 'encerrada');
-CREATE TYPE "tipo_movimentacao"  AS ENUM ('entrada', 'saida', 'transferencia', 'ajuste');
-CREATE TYPE "tipo_entidade"      AS ENUM ('obra', 'fornecedor', 'deposito');
+CREATE TYPE "Perfil"               AS ENUM ('leitor', 'editor', 'administrador');
+CREATE TYPE "status_colaborador"   AS ENUM ('ativo', 'inativo', 'afastado');
+CREATE TYPE "status_obra"          AS ENUM ('ativa', 'pausada', 'encerrada');
+CREATE TYPE "tipo_movimentacao"    AS ENUM ('entrada', 'saida', 'transferencia', 'ajuste');
+CREATE TYPE "tipo_entidade"        AS ENUM ('obra', 'fornecedor', 'deposito');
+CREATE TYPE "status_movimentacao"  AS ENUM ('confirmada', 'pendente');
 
 -- USUÁRIOS
 CREATE TABLE "usuarios" (
@@ -132,23 +133,25 @@ CREATE TABLE "estoque" (
 
 -- MOVIMENTAÇÕES
 CREATE TABLE "movimentacoes" (
-  "id"             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  "tipo"           "tipo_movimentacao" NOT NULL,
-  "produto_id"     UUID NOT NULL REFERENCES "produtos"("id"),
-  "quantidade"     NUMERIC NOT NULL,
-  "valor_unitario" NUMERIC NOT NULL,
-  "valor_total"    NUMERIC GENERATED ALWAYS AS (quantidade * valor_unitario) STORED,
-  "origem_tipo"    "tipo_entidade",
-  "origem_id"      UUID,
-  "destino_tipo"   "tipo_entidade",
-  "destino_id"     UUID,
-  "obra_id"        UUID REFERENCES "obras"("id"),
-  "fornecedor_id"  UUID REFERENCES "fornecedores"("id"),
-  "observacoes"    TEXT,
-  "realizado_por"  UUID NOT NULL REFERENCES "usuarios"("id"),
-  "created_at"     TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
-  "updated_at"     TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
-  "deleted_at"     TIMESTAMPTZ(6)
+  "id"               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "tipo"             "tipo_movimentacao" NOT NULL,
+  "status"           "status_movimentacao" NOT NULL DEFAULT 'confirmada',
+  "produto_id"       UUID NOT NULL REFERENCES "produtos"("id"),
+  "quantidade"       NUMERIC NOT NULL,
+  "valor_unitario"   NUMERIC NOT NULL,
+  "valor_total"      NUMERIC GENERATED ALWAYS AS (quantidade * valor_unitario) STORED,
+  "origem_tipo"      "tipo_entidade",
+  "origem_id"        UUID,
+  "destino_tipo"     "tipo_entidade",
+  "destino_id"       UUID,
+  "obra_id"          UUID REFERENCES "obras"("id"),
+  "fornecedor_id"    UUID REFERENCES "fornecedores"("id"),
+  "data_necessidade" DATE,
+  "observacoes"      TEXT,
+  "realizado_por"    UUID NOT NULL REFERENCES "usuarios"("id"),
+  "created_at"       TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
+  "updated_at"       TIMESTAMPTZ(6) NOT NULL DEFAULT now(),
+  "deleted_at"       TIMESTAMPTZ(6)
 );
 
 -- LOGS
@@ -187,6 +190,8 @@ CREATE INDEX "idx_movimentacoes_tipo"     ON "movimentacoes"("tipo");
 CREATE INDEX "idx_movimentacoes_created"  ON "movimentacoes"("created_at");
 CREATE INDEX "idx_movimentacoes_origem"   ON "movimentacoes"("origem_tipo", "origem_id");
 CREATE INDEX "idx_movimentacoes_destino"  ON "movimentacoes"("destino_tipo", "destino_id");
+CREATE INDEX "idx_movimentacoes_status"   ON "movimentacoes"("status");
+CREATE INDEX "idx_movimentacoes_obra_kpi" ON "movimentacoes"("obra_id", "status", "data_necessidade");
 CREATE INDEX "idx_logs_usuario"           ON "logs"("usuario_id");
 CREATE INDEX "idx_logs_tabela"            ON "logs"("tabela_afetada");
 CREATE INDEX "idx_logs_created"           ON "logs"("created_at");

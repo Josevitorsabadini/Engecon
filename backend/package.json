@@ -14,7 +14,8 @@
     "db:seed": "prisma db seed",
     "db:resolve": "prisma migrate resolve --applied 20260507000000_initial",
     "db:resolve:2": "prisma migrate resolve --applied 20260507000001_add_refresh_tokens",
-    "db:resolve:3": "prisma migrate resolve --applied 20260509000000_add_ajuste_tipo_movimentacao"
+    "db:resolve:3": "prisma migrate resolve --applied 20260509000000_add_ajuste_tipo_movimentacao",
+    "db:resolve:4": "prisma migrate resolve --applied 20260517000000_add_pedidos_movimentacoes"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -102,7 +102,7 @@ Fase 1: Helmet, CORS, rate limiting base, estrutura de erros centralizada
 Fase 2: JWT + refresh token, middleware de auth, brute-force, testes de token
 Fase 3: constraints no banco, tipos corretos, soft delete, índices, colunas geradas
 Fases 4–7: Zod em todos os inputs, autorização por rota, log de cada operação
-Fase 8: queries agregadas sem expor dados além do perfil
+Fase 8: pedidos pendentes em movimentacoes + KPIs de obras no dashboard
 Fase 9: rotas protegidas no React, httpOnly cookie, sem dados sensíveis no cliente
 Fase 10: revisão geral, testes básicos de penetração, checklist de hardening para VPS
 
@@ -117,7 +117,7 @@ Fase 4 — Módulo: Movimentações (3–4 dias)
 Fase 5 — Módulo: Produtos e Estoque (2–3 dias)
 Fase 6 — Módulo: Colaboradores e Alocações (2–3 dias)
 Fase 7 — Painel Administrativo: Fornecedores, Depósitos, Obras e Usuários (2–3 dias)
-Fase 8 — Dashboard e Resumo Geral (2 dias)
+Fase 8 — Pedidos Pendentes + Dashboard (3–4 dias)
 Fase 9 — Frontend React Integrado (5–10 dias)
 Fase 10 — Testes e Preparação para Deploy (2–3 dias)
 
